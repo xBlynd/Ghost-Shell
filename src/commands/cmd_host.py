@@ -4,71 +4,52 @@ from src.core.host_bridge import HostBridge
 
 def run(args):
     if not args:
-        print("Usage:")
-        print("  xsv host ls [path]    - List files")
-        print("  xsv host open <path>  - Open file/folder")
-        print("  xsv host nuke <path>  - FORCE DELETE file/folder")
-        print("  xsv host ps           - List Processes")
-        print("  xsv host info         - System Stats")
+        print("Usage: xsv host [ls|nuke|ps|info]")
         return
 
     cmd = args[0].lower()
 
-    # --- LIST FILES ---
     if cmd == "ls":
         target = args[1] if len(args) > 1 else "."
         items = HostBridge.list_path(target)
-        
-        if items is None:
-            print(f"❌ Path not found: {target}")
-            return
-
-        print(f"📂 Listing: {os.path.abspath(target)}\n")
-        print(f"{'TYPE':<6} {'SIZE (KB)':<10} {'NAME'}")
+        if items is None: return
+        print(f"📂 Listing: {os.path.abspath(target)}")
+        print(f"{'TYPE':<6} {'SIZE':<10} {'NAME'}")
         print("-" * 40)
-        
         for i in items:
-            size_str = f"{i['size']/1024:.1f}" if i['type'] == "FILE" else "-"
-            icon = "📁" if i['type'] == "DIR" else "📄"
-            print(f"{i['type']:<6} {size_str:<10} {icon} {i['name']}")
+            size = f"{i['size']/1024:.1f} KB" if i['type'] == "FILE" else "-"
+            print(f"{i['type']:<6} {size:<10} {i['name']}")
 
-    # --- OPEN / LAUNCH ---
-    elif cmd == "open" or cmd == "launch":
-        if len(args) < 2: return
-        HostBridge.launch(args[1])
-
-    # --- NUKE (DELETE) ---
     elif cmd == "nuke":
-        if len(args) < 2: 
-            print("❌ Error: You must specify a target to nuke.")
-            return
-        
+        if len(args) < 2: return
         target = args[1]
-        print(f"⚠️  WARNING: You are about to PERMANENTLY DELETE: {target}")
-        confirm = input("Are you sure? (yes/no): ")
-        
-        if confirm.lower() == "yes":
-            if HostBridge.nuke_path(target):
-                print(f"💥 Nuked: {target}")
-            else:
-                print("❌ Delete failed.")
-        else:
-            print("🛑 Operation cancelled.")
+        if input(f"⚠️ NUKE {target}? (y/n): ") == "y":
+            HostBridge.nuke_path(target)
+            print("💥 Nuked.")
 
-    # --- PROCESS LIST ---
     elif cmd == "ps":
         procs = HostBridge.get_processes()
-        print(f"⚙️  Running Processes ({len(procs)}):")
-        # Show first 15 for brevity
-        for p in procs[:15]:
-            print(p)
-        print("... (use 'tasklist' for full list)")
+        print(f"⚙️ Running Processes ({len(procs)}):")
+        for p in procs[:15]: print(p)
 
-    # --- INFO ---
+    # --- UPDATED INFO COMMAND ---
     elif cmd == "info":
-        info = HostBridge.get_system_info()
-        print(f"🖥️  System: {info['os']} {info['release']}")
-        print(f"👤 User:   {info['user']}")
+        data = HostBridge.get_deep_info()
+        
+        print("\n🖥️  SYSTEM DIAGNOSTICS")
+        print("=" * 40)
+        print(f"👑 User:        {data['user']}")
+        print(f"🏠 Hostname:    {data['hostname']}")
+        print(f"📡 Local IP:    {data['ip_local']}")
+        print("-" * 40)
+        print(f"💿 OS:          {data['os']} ({data['machine']})")
+        print(f"🧠 CPU:         {data['cpu']}")
+        print(f"💾 RAM:         {data['ram_total']}")
+        print(f"💽 Disk Free:   {data['disk_free']} / {data['disk_total']}")
+        print("=" * 40 + "\n")
 
+    elif cmd == "open" or cmd == "launch":
+        if len(args) > 1: HostBridge.launch(args[1])
+        
     else:
-        print(f"❌ Unknown host command: {cmd}")
+        print("Unknown host command.")

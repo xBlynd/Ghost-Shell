@@ -1,0 +1,5 @@
+"hack": {
+  "type": "script",
+  "path": "library/matrix_prank.py",
+  "description": "Fake Matrix Rain (Prank)"
+}
