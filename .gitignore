@@ -1,0 +1,9 @@
+# --- IGNORE PRIVATE DATA ---
+data/vault/
+data/logs/
+data/config/secrets.json
+__pycache__/
+*.pyc
+
+# --- BUT KEEP THE SKELETON ---
+!data/config/commands.json

@@ -14,6 +14,16 @@
       "type": "script",
       "path": "library/matrix.py",
       "description": "Run the Matrix Prank"
+    },
+    "menu": {
+      "type": "shell",
+      "cmd": "xsv help",
+      "description": "Show Help Menu"
+    },
+    "?": {
+      "type": "shell",
+      "cmd": "xsv help",
+      "description": "Show Help Menu"
     }
   }
 }
