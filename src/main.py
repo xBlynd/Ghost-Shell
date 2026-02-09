@@ -10,22 +10,21 @@ from src.commands import cmd_journal, cmd_todo, cmd_host, cmd_launcher, cmd_alia
 def main():
     if len(sys.argv) < 2:
         HostBridge.clear_screen()
-        print("xsvCommandCenter [v2.4-AliasPro]")
-        print("--------------------------------")
-        print("Built-in:")
-        print("  host [ls|nuke|ps]    - System Navigator")
+        print("xsvCommandCenter [v2.5-Magic]")
+        print("-----------------------------")
+        print("  host [info|ls]       - System Tools")
         print("  journal [add|view]   - Daily Logs")
         print("  todo [add|list]      - Task Manager")
-        print("  alias [add|list]     - Manage Command Names")
+        print("  alias [add|list]     - Manage Shortcuts")
         
-        # Show Custom Commands
+        # List Custom Commands from JSON
         cmd_launcher.Launcher().list_commands()
         return
 
     cmd = sys.argv[1].lower()
     args = sys.argv[2:]
 
-    # 1. CHECK BUILT-INS
+    # 1. BUILT-IN COMMANDS
     if cmd == "host":
         cmd_host.run(args)
     elif cmd == "journal":
@@ -35,14 +34,14 @@ def main():
     elif cmd == "alias":
         cmd_alias.run(args)
         
-    # 2. CHECK MAGIC LAUNCHER
+    # 2. MAGIC LAUNCHER (The Fallback)
     else:
-        # Try to run it as a custom command
         launcher = cmd_launcher.Launcher()
         found = launcher.run(cmd)
         
         if not found:
-            print(f"❌ Unknown command: {cmd}")
+            print(f"❌ Unknown command: '{cmd}'")
+            print("   (Edit data/config/commands.json to add it!)")
 
 if __name__ == "__main__":
     main()

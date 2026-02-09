@@ -1,5 +1,19 @@
-"hack": {
-  "type": "script",
-  "path": "library/matrix_prank.py",
-  "description": "Fake Matrix Rain (Prank)"
+{
+  "commands": {
+    "ping": {
+      "type": "shell",
+      "cmd": "ping google.com",
+      "description": "Test Internet Connection"
+    },
+    "restore": {
+      "type": "script",
+      "path": "library/restore_xsv.ps1",
+      "description": "Run the Restore Script"
+    },
+    "matrix": {
+      "type": "script",
+      "path": "library/matrix.py",
+      "description": "Run the Matrix Prank"
+    }
+  }
 }

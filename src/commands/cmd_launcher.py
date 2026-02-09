@@ -11,19 +11,16 @@ class Launcher:
         self.library_path = self.root / "library"
 
     def load_commands(self):
-        if not self.config_path.exists():
-            return {}
+        if not self.config_path.exists(): return {}
         try:
             with open(self.config_path, "r") as f:
-                data = json.load(f)
-                return data.get("commands", {})
-        except:
-            return {}
+                return json.load(f).get("commands", {})
+        except: return {}
 
     def list_commands(self):
         cmds = self.load_commands()
         if not cmds: return
-        print("\n⚡ CUSTOM COMMANDS (from commands.json):")
+        print("\n⚡ MAGIC COMMANDS (commands.json):")
         print(f"{'COMMAND':<15} {'DESCRIPTION'}")
         print("-" * 40)
         for name, data in cmds.items():
@@ -32,37 +29,29 @@ class Launcher:
 
     def run(self, command_name):
         commands = self.load_commands()
-        
-        if command_name not in commands:
-            return False # Command not found
+        if command_name not in commands: return False
 
         cfg = commands[command_name]
         print(f"🚀 Launching: {cfg.get('description', command_name)}...")
 
-        # 1. HANDLE CONFIRMATION
         if cfg.get("confirm", False):
-            ask = input("⚠️  Are you sure? (y/n): ")
-            if ask.lower() != "y":
+            if input("⚠️  Are you sure? (y/n): ").lower() != "y":
                 print("🛑 Cancelled.")
                 return True
 
-        # 2. EXECUTE SCRIPT
         try:
             if cfg['type'] == 'script':
-                # Auto-detect script location
+                # Check library first, then relative path
                 script_path = self.library_path / Path(cfg['path']).name
-                # If path in json was relative/full, try that too
                 if not script_path.exists():
                     script_path = self.root / cfg['path']
                 
                 HostBridge.launch(str(script_path))
                 
             elif cfg['type'] == 'shell':
-                # Run raw command (e.g., "ping google.com")
                 subprocess.run(cfg['cmd'], shell=True)
                 
-            print("✅ Execution Complete.")
+            print("✅ Done.")
         except Exception as e:
             print(f"❌ Error: {e}")
-            
         return True
