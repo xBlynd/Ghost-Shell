@@ -1,93 +1,86 @@
 import sys
 import os
-import json
 from pathlib import Path
 
-# CONSTANTS
+# CONFIG
 PROJECT_ROOT = Path(__file__).parent.parent.parent
-COMMANDS_JSON = PROJECT_ROOT / "data" / "config" / "commands.json"
-COMMANDS_DIR = PROJECT_ROOT / "src" / "commands"
+CUSTOM_DIR = PROJECT_ROOT / "src" / "commands" / "custom"
 
-def load_json():
-    if not COMMANDS_JSON.exists(): return {}
-    with open(COMMANDS_JSON, "r") as f: return json.load(f)
+def get_multiline_input():
+    print(" [?] Enter Code below.")
+    print(" [?] Type 'END' on a new line to finish.")
+    print("-" * 40)
+    lines = []
+    while True:
+        line = input()
+        if line.strip() == "END":
+            break
+        lines.append(line)
+    return "\n".join(lines)
 
-def save_json(data):
-    with open(COMMANDS_JSON, "w") as f: json.dump(data, f, indent=4)
+def create_command(name=None):
+    print("\n 🛠️  CREATE CUSTOM COMMAND")
+    print(" " + "="*30)
 
-def create_alias(name):
-    print(f"\n[Creating Alias: '{name}']")
-    desc = input("Description: ")
-    cmd = input("Shell Command to Run (e.g., 'ipconfig /all'): ")
+    # 1. Get Name
+    if not name:
+        name = input(" [?] Command Name (One word): ").lower().strip()
     
-    data = load_json()
-    data[name] = {
-        "type": "shell",
-        "cmd": cmd,
-        "description": desc
-    }
-    save_json(data)
-    print(f"✅ Alias '{name}' created! Type '{name}' to run it.")
-
-def create_module(name):
-    print(f"\n[Creating Python Module: '{name}']")
-    desc = input("Description: ")
-    
-    # Python Filename
-    filename = f"cmd_{name}.py"
-    filepath = COMMANDS_DIR / filename
-    
-    if filepath.exists():
-        print(f"❌ Error: {filename} already exists!")
+    if not name:
+        print(" ❌ Name required.")
         return
 
-    # The Template
-    code = f'''import sys
+    # Check for conflicts
+    filename = f"cmd_{name}.py"
+    filepath = CUSTOM_DIR / filename
+    
+    if filepath.exists():
+        print(f" ⚠️  Warning: '{name}' already exists in Custom.")
+        if input("     Overwrite? (y/n): ").lower() != 'y':
+            return
+
+    # 2. Get Description
+    desc = input(" [?] Description: ").strip()
+
+    # 3. Get Code
+    print("\n [?] Paste your Python code now.")
+    print("     (No need to write 'def run(args):', just paste the logic).")
+    user_code = get_multiline_input()
+
+    # 4. Wrap & Write
+    # We indent the user's code to fit inside the run() function
+    indented_code = "\n    ".join(user_code.splitlines())
+    
+    file_content = f'''import sys
 import os
+import platform
 
 # Module: {name}
 # Description: {desc}
 
 def run(args):
-    print("\\n🚀 Running {name}...")
+    print("\\n🚀 Running Custom Command: {name}...")
     
-    # --- YOUR CODE BELOW ---
-    print("TODO: Add logic for {desc}")
+    # --- USER CODE START ---
+    {indented_code}
+    # --- USER CODE END ---
     
-    # Example:
-    # if args and args[0] == "test":
-    #     print("Test mode")
-    
-    print("✅ Done.")
+    print("\\n✅ {name} finished.")
 '''
-    
+
+    # Ensure dir exists
+    CUSTOM_DIR.mkdir(parents=True, exist_ok=True)
+    # Ensure __init__.py exists
+    (CUSTOM_DIR / "__init__.py").touch()
+
     with open(filepath, "w", encoding="utf-8") as f:
-        f.write(code)
-        
-    print(f"✅ Module '{filename}' created!")
-    print(f"   Location: src/commands/{filename}")
-    print(f"   Action: Open that file and paste your AI code.")
+        f.write(file_content)
+
+    print("\n" + "="*30)
+    print(f" ✅ SUCCESS: Created 'src/commands/custom/{filename}'")
+    print(f" 🚀 Usage: Type '{name}' in the shell to run it.")
 
 def run(args):
-    print("\n🛠️  COMMAND FACTORY")
-    print("-------------------")
-    
-    if not args:
-        name = input("Enter new command name: ").lower().strip()
-    else:
-        name = args[0].lower().strip()
-
-    if not name: return
-
-    print("Type of Command:")
-    print("  1. Alias/Shortcut (Runs a one-line shell command)")
-    print("  2. Python Module  (Complex logic, menus, advanced tools)")
-    
-    choice = input("Select [1/2]: ").strip()
-    
-    if choice == "1":
-        create_alias(name)
-    elif choice == "2":
-        create_module(name)
-    else:
-        print("❌ Invalid choice.")
+    # Determine if name was passed in args
+    name = args[0] if args else None
+    create_command(name)

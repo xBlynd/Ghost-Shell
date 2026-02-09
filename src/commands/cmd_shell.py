@@ -16,26 +16,20 @@ DEFAULT_USER = "admin"
 DEFAULT_PASS = "admin"
 
 def login():
-    """Simple Security Check"""
     HostEngine.clear_screen()
     print("🔒 xsvCommandCenter | SECURE SESSION")
     print("-" * 35)
-    
     while True:
         try:
             u = input("User: ")
             p = getpass.getpass("Pass: ")
-            if u == DEFAULT_USER and p == DEFAULT_PASS:
-                return True
+            if u == DEFAULT_USER and p == DEFAULT_PASS: return True
             print("❌ Access Denied.")
-        except KeyboardInterrupt:
-            return False
+        except KeyboardInterrupt: return False
 
 def run(args):
-    # 1. AUTHENTICATE
     if not login(): return
 
-    # 2. INITIALIZE SESSION
     HostEngine.clear_screen()
     hostname = socket.gethostname()
     username = os.getlogin()
@@ -43,19 +37,15 @@ def run(args):
     print(f"   Target: {username}@{hostname}")
     print("-" * 40)
     print("Type 'help' for options. Type 'exit' to disconnect.")
-    print("Type 'sh' or 'cmd' to drop into raw host terminal.\n")
+    print("Type 'reload' to refresh commands after editing.\n")
 
-    # 3. INTERACTIVE LOOP
     while True:
         try:
             cwd = os.getcwd()
-            # Shorten path for display
-            display_cwd = cwd
-            if len(cwd) > 30: display_cwd = "..." + cwd[-30:]
+            display_cwd = cwd if len(cwd) <= 30 else "..." + cwd[-30:]
             
             prompt = f"xsv@{hostname} [{display_cwd}] > "
             user_input = input(prompt).strip()
-            
             if not user_input: continue
 
             parts = shlex.split(user_input)
@@ -77,70 +67,62 @@ def run(args):
                 except Exception as e: print(f"❌ {e}")
                 continue
 
-            # --- B. ESCAPE HATCHES (The "Safety Net") ---
-            
-            # MODE 2: Force Host Execution ('exec ping')
+            # --- B. RELOAD COMMAND (The Fix) ---
+            if cmd == "reload":
+                print("♻️  Clearing Python Cache...")
+                importlib.invalidate_caches()
+                # We can't easily un-import modules in Python without a full restart,
+                # but we can force re-import of specific ones if we track them.
+                # For now, this clears the finder cache which helps with NEW files.
+                print("✅ Cache Cleared. (For modified files, best to restart shell).")
+                continue
+
+            # --- C. ESCAPE HATCHES ---
             if cmd == "exec":
-                if not cmd_args:
-                    print("⚠️ Usage: exec <command>")
-                    continue
-                # Join the rest of the arguments exactly as typed
-                full_cmd = " ".join(cmd_args)
-                print(f"Executing on Host: {full_cmd}")
-                try:
-                    subprocess.run(full_cmd, shell=True)
-                except Exception as e:
-                    print(f"❌ Execution failed: {e}")
+                full_cmd = " ".join(parts[1:])
+                subprocess.run(full_cmd, shell=True)
                 continue
 
-            # MODE 3: Drop to Raw Shell ('sh' or 'cmd')
             if cmd in ["sh", "cmd", "bash", "powershell"]:
-                print(f"⚠️  Dropping to Host Shell ({cmd})...")
-                print("   Type 'exit' to return to Ghost Shell.")
                 try:
-                    # Windows prefers 'cmd', Linux 'bash'
                     shell_cmd = "cmd" if os.name == 'nt' else "bash"
-                    # If they specifically asked for powershell, give it to them
                     if cmd == "powershell": shell_cmd = "powershell"
-                    
                     subprocess.call(shell_cmd, shell=True)
-                except Exception as e:
-                    print(f"❌ Failed to launch shell: {e}")
-                
-                print("\n👻 Welcome back to Ghost Shell.")
+                except Exception as e: print(f"❌ Error: {e}")
                 continue
 
-            # --- C. ALIASES (Your "Shortcuts") ---
-            if cmd == "info":
-                import src.commands.cmd_host as h
-                h.run(["info"])
-                continue
+            # --- D. SMART ROUTING (Core vs Custom) ---
             
-            if cmd == "ps":
-                import src.commands.cmd_host as h
-                h.run(["ps"])
-                continue
-
-            # --- D. MODULE ROUTING (Mode 1: The "Smart" Way) ---
+            # 1. Check SYSTEM Commands (src/commands/cmd_*.py)
             try:
-                # Tries to find src/commands/cmd_{cmd}.py
                 module = importlib.import_module(f"src.commands.cmd_{cmd}")
+                importlib.reload(module) # Force Reload on Execution
                 module.run(cmd_args)
                 continue
             except ModuleNotFoundError:
                 pass 
 
-            # --- E. MAGIC COMMANDS ---
-            launcher = cmd_launcher.Launcher()
-            if launcher.run(cmd):
+            # 2. Check CUSTOM Commands (src/commands/custom/cmd_*.py)
+            try:
+                module = importlib.import_module(f"src.commands.custom.cmd_{cmd}")
+                importlib.reload(module) # Force Reload on Execution
+                module.run(cmd_args)
+                continue
+            except ModuleNotFoundError:
+                pass 
+
+            # --- E. ALIASES & MAGIC ---
+            if cmd == "info":
+                import src.commands.cmd_host as h
+                h.run(["info"])
                 continue
 
-            # --- F. SYSTEM FALLBACK (Lazy Mode) ---
-            # If nothing else matches, run it as a Windows/Linux command
-            try:
-                subprocess.run(user_input, shell=True)
-            except Exception as e:
-                print(f"❌ System Error: {e}")
+            launcher = cmd_launcher.Launcher()
+            if launcher.run(cmd): continue
+
+            # --- F. FALLBACK ---
+            try: subprocess.run(user_input, shell=True)
+            except Exception as e: print(f"❌ System Error: {e}")
 
         except KeyboardInterrupt:
             print("\nType 'exit' to quit.")
