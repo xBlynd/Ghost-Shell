@@ -10,67 +10,91 @@ class HostBridge:
     def get_os_type():
         """Returns 'windows', 'linux', or 'macos'."""
         system = platform.system().lower()
-        if system == "darwin":
-            return "macos"
+        if system == "darwin": return "macos"
         return system
 
     @staticmethod
     def clear_screen():
-        """Clears terminal window based on OS."""
+        """Clears terminal window."""
         command = "cls" if os.name == "nt" else "clear"
         os.system(command)
 
     @staticmethod
-    def is_wsl():
-        """Detects if we are running inside WSL (Windows Subsystem for Linux)."""
-        if platform.system().lower() != "linux":
-            return False
-        try:
-            with open("/proc/version", "r") as f:
-                return "microsoft" in f.read().lower()
-        except:
-            return False
-
-    @staticmethod
     def launch(path):
-        """
-        Universal 'Open File' command.
-        - Windows: Uses os.startfile
-        - Linux: Uses xdg-open
-        - WSL: Tries to use explorer.exe if accessible, else xdg-open
-        """
+        """Universal 'Open File' command."""
         p = Path(path)
         if not p.exists():
             print(f"❌ Error: Path not found: {path}")
             return False
-
+        
         system = HostBridge.get_os_type()
-
         try:
             if system == "windows":
                 os.startfile(p)
             elif system == "linux":
-                # Special handling for WSL to open files in Windows side
-                if HostBridge.is_wsl():
-                    subprocess.run(["explorer.exe", str(p)])
-                else:
-                    subprocess.run(["xdg-open", str(p)])
+                subprocess.run(["xdg-open", str(p)])
             elif system == "macos":
                 subprocess.run(["open", str(p)])
-            print(f"🚀 Launched: {p.name}")
             return True
         except Exception as e:
             print(f"❌ Launch Failed: {e}")
             return False
 
+    # --- NEW NAVIGATOR FEATURES ---
+
+    @staticmethod
+    def list_path(target="."):
+        """Returns a list of dictionaries with file info."""
+        p = Path(target)
+        if not p.exists(): return None
+        
+        items = []
+        try:
+            for item in p.iterdir():
+                items.append({
+                    "name": item.name,
+                    "type": "DIR" if item.is_dir() else "FILE",
+                    "size": item.stat().st_size if item.is_file() else 0,
+                    "path": str(item)
+                })
+            # Sort: Directories first, then files
+            return sorted(items, key=lambda x: (x["type"] == "FILE", x["name"]))
+        except Exception as e:
+            print(f"❌ Error listing directory: {e}")
+            return []
+
+    @staticmethod
+    def nuke_path(target):
+        """Force deletes a file or directory."""
+        p = Path(target)
+        if not p.exists(): return False
+        
+        try:
+            if p.is_dir():
+                shutil.rmtree(p) # Recursive delete
+            else:
+                os.remove(p)
+            return True
+        except Exception as e:
+            print(f"❌ Nuke Failed: {e}")
+            return False
+
+    @staticmethod
+    def get_processes():
+        """Returns list of running process names (Cross-platformish)."""
+        system = HostBridge.get_os_type()
+        cmd = ["tasklist"] if system == "windows" else ["ps", "-e"]
+        
+        try:
+            result = subprocess.check_output(cmd, encoding="utf-8")
+            return result.splitlines()
+        except:
+            return []
+
     @staticmethod
     def get_system_info():
-        """Returns a dict of system stats for the console."""
         return {
             "os": platform.system(),
             "release": platform.release(),
-            "machine": platform.machine(),
-            "is_wsl": HostBridge.is_wsl(),
-            "python_version": sys.version.split()[0],
             "user": os.getlogin()
         }
