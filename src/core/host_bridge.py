@@ -13,14 +13,11 @@ class HostBridge:
         s = platform.system().lower()
         if s == "darwin": return "macos"
         if s == "windows": return "windows"
-        
-        # Check for ChromeOS / Crostini
         if os.path.exists("/etc/os-release"):
             try:
                 with open("/etc/os-release") as f:
                     data = f.read().lower()
-                    if "chromeos" in data or "cros" in data:
-                        return "chromeos"
+                    if "chromeos" in data or "cros" in data: return "chromeos"
             except: pass
         return "linux"
 
@@ -72,87 +69,76 @@ class HostBridge:
         except: return []
 
     @staticmethod
-    def get_cloud_storage():
-        """Detects OneDrive, Google Drive, Dropbox locations"""
-        home = Path.home()
-        clouds = []
-        
-        # Windows Paths
-        if os.name == "nt":
-            onedrive = os.environ.get("OneDrive")
-            if onedrive and Path(onedrive).exists():
-                clouds.append({"name": "OneDrive", "path": onedrive})
-            
-            gdrive = home / "Google Drive"
-            if gdrive.exists(): clouds.append({"name": "Google Drive", "path": str(gdrive)})
-            
-            gdrive_fs = Path("G:/") # Common Google Drive Desktop mount
-            if gdrive_fs.exists(): clouds.append({"name": "Google Drive (Virtual)", "path": "G:/"})
-
-        # Linux/ChromeOS Paths
-        else:
-            candidates = [home / "OneDrive", home / "Google Drive", home / "Dropbox"]
-            for c in candidates:
-                if c.exists(): clouds.append({"name": c.name, "path": str(c)})
-                
-            if os.path.exists("/mnt/chromeos/GoogleDrive"):
-                clouds.append({"name": "ChromeOS GDrive", "path": "/mnt/chromeos/GoogleDrive"})
-
-        return clouds
-
-    @staticmethod
     def get_deep_info():
         s = platform.system()
-        os_type = HostBridge.get_os_type()
-        
         info = {
-            "OS": f"{s} {platform.release()} ({os_type.upper()})",
+            "OS": f"{s} {platform.release()}",
             "Build": platform.version(),
             "Disks": [],
+            "GPUs": [],
             "Network": [],
-            "Cloud": HostBridge.get_cloud_storage()
+            "Cloud": [],
+            "USB_Devices": []
         }
         
         if s == "Windows":
+            # Advanced PowerShell Script for Enthusiast Hardware
             ps_script = r"""
             $ErrorActionPreference = "SilentlyContinue"
-            $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
-            $gpu = Get-CimInstance Win32_VideoController | Select-Object -First 1
+            
+            # 1. CPU & Motherboard
+            $cpu = Get-CimInstance Win32_Processor
+            $mobo = Get-CimInstance Win32_BaseBoard
+            
+            # 2. RAM Details
             $ram_sticks = Get-CimInstance Win32_PhysicalMemory
             $ram_total = ($ram_sticks | Measure-Object -Property Capacity -Sum).Sum / 1GB
-            $disk = Get-PhysicalDisk | Select-Object FriendlyName, MediaType, Size
+            
+            # 3. ALL GPUs (Not just the first one)
+            $gpus = Get-CimInstance Win32_VideoController | Select-Object Name, AdapterRAM, DriverVersion
+            
+            # 4. Storage & Drives
+            $disks = Get-PhysicalDisk | Select-Object FriendlyName, MediaType, Size, BusType
+            $logic = Get-PSDrive -PSProvider FileSystem | Select-Object Name, Root, Description
+            
+            # 5. Network
             $net = Get-NetAdapter | Where-Object Status -eq 'Up'
+            
+            # 6. USB/Cooling Scan (Looking for specific enthusiast keywords)
+            $usb = Get-PnpDevice -Class 'USB', 'HIDClass' -Status 'OK' | Where-Object { $_.FriendlyName -match 'Corsair|NZXT|Liquid|Pump|AIO|Cooler|Hub|Commander' } | Select-Object FriendlyName
 
             $info = @{
                 CPU = $cpu.Name
                 Cores = $cpu.NumberOfCores
-                GPU_Name = $gpu.Name
+                Mobo = "$($mobo.Manufacturer) $($mobo.Product)"
                 RAM_Total = [math]::Round($ram_total, 1)
-                Disks = @($disk)
+                GPUs = @($gpus)
+                Disks = @($disks)
+                Drives = @($logic)
                 Network = @($net | Select-Object Name, MacAddress)
+                USB_Devices = @($usb)
             }
             $info | ConvertTo-Json -Depth 3 -Compress
             """
             try:
                 res = subprocess.check_output(["powershell", "-NoProfile", "-Command", ps_script], encoding="utf-8", errors="ignore")
-                info.update(json.loads(res))
-            except Exception as e: info["Error"] = str(e)
-            
-        elif s == "Linux":
-            try:
-                if os.path.exists("/proc/cpuinfo"):
-                    with open("/proc/cpuinfo") as f:
-                        for l in f: 
-                            if "model name" in l: info["CPU"] = l.split(":")[1].strip(); break
+                data = json.loads(res)
+                info.update(data)
                 
-                mem = subprocess.getoutput("free -g").split()
-                if "Mem:" in mem: info["RAM_Total"] = f"{mem[1]} GB"
+                # --- CLOUD DETECTION LOGIC ---
+                # Check 1: User Folder
+                home = Path.home()
+                if (home / "OneDrive").exists(): 
+                    info["Cloud"].append({"name": "OneDrive", "path": str(home / "OneDrive")})
+                
+                # Check 2: Virtual Drives (G: is standard for Google Drive)
+                for d in data.get("Drives", []):
+                    root = d.get("Root", "").upper()
+                    if root == "G:\\":
+                        info["Cloud"].append({"name": "Google Drive (Virtual)", "path": "G:\\"})
+                    elif "Google" in d.get("Description", ""):
+                        info["Cloud"].append({"name": "Google Drive", "path": root})
 
-                lsblk = subprocess.getoutput("lsblk -d -o NAME,SIZE,MODEL").splitlines()
-                if len(lsblk) > 1:
-                    for l in lsblk[1:]:
-                        p = l.split()
-                        if len(p) >= 2: info["Disks"].append({"FriendlyName": p[0], "Size": p[1]})
             except Exception as e: info["Error"] = str(e)
             
         return info

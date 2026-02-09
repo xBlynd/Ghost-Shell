@@ -34,43 +34,53 @@ def run(args):
         print(f"⚙️ Running Processes ({len(procs)}):")
         for p in procs[:15]: print(p)
 
-    # --- UPDATED INFO COMMAND ---
+    # --- ENTHUSIAST INFO DISPLAY ---
     elif cmd == "info":
-        print("\n⏳ Scanning hardware & cloud services...")
+        print("\n⏳ Scanning enthusiast hardware & peripherals...")
         data = HostBridge.get_deep_info()
         
         print("\n" + "="*60)
         print(f"   SYSTEM AUDIT REPORT | {data.get('OS', 'Unknown')}")
         print("="*60)
 
-        print(f"\n🧠 HARDWARE")
+        print(f"\n🧠 CORE")
         print(f"   CPU:   {data.get('CPU', 'Unknown')}")
+        print(f"   Mobo:  {data.get('Mobo', 'Unknown')}")
         print(f"   RAM:   {data.get('RAM_Total', '?')} GB")
-        print(f"   GPU:   {data.get('GPU_Name', 'Unknown')}")
 
-        print(f"\n☁️ CLOUD STORAGE")
+        print(f"\n🎮 GRAPHICS")
+        gpus = data.get('GPUs', [])
+        # Handle single dict or list of dicts
+        if isinstance(gpus, dict): gpus = [gpus]
+        for g in gpus:
+            vram = "Unknown VRAM"
+            if g.get('AdapterRAM'):
+                try: vram = f"{int(g['AdapterRAM']) // (1024**3)} GB"
+                except: pass
+            print(f"   • {g.get('Name', 'Unknown GPU')} [{vram}]")
+
+        print(f"\n❄️ COOLING & PERIPHERALS")
+        usb = data.get('USB_Devices', [])
+        if isinstance(usb, dict): usb = [usb]
+        if not usb:
+            print("   (No dedicated cooler/hub detected via USB)")
+        else:
+            for u in usb:
+                print(f"   • {u.get('FriendlyName', 'Unknown Device')}")
+
+        print(f"\n☁️ CLOUD DRIVES")
         clouds = data.get('Cloud', [])
         if not clouds:
-            print("   (No Cloud Services Detected)")
+            print("   (No Cloud Mounts Detected)")
         else:
             for c in clouds:
                 print(f"   • {c['name']}: {c['path']}")
 
-        print(f"\n💽 DRIVES")
-        for d in data.get('Disks', []):
-            try: 
-                # Handle simplified linux disk dict or complex windows dict
-                name = d.get('FriendlyName', 'Drive')
-                size = d.get('Size', '?')
-                # Rough conversion if it looks like bytes
-                if str(size).isdigit() and int(size) > 1000: 
-                    size = f"{int(size)//(1024**3)} GB"
-                print(f"   • {name} [{size}]")
-            except: pass
-
-        print(f"\n📡 NETWORK")
-        for n in data.get('Network', []):
-            print(f"   • {n.get('Name', 'Net')}: {n.get('MacAddress', '')}")
+        print(f"\n💽 STORAGE")
+        disks = data.get('Disks', [])
+        if isinstance(disks, dict): disks = [disks]
+        for d in disks:
+            print(f"   • {d.get('FriendlyName', 'Disk')} ({d.get('MediaType', '')})")
 
         print("\n" + "="*60 + "\n")
 
