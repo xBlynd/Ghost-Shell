@@ -1,3 +1,8 @@
+# ( The Manual )
+
+**Changes:** Updated the Routing Logic to show the priority list (System -> Custom -> Library), and added the new "Threading" rule for GUI apps (like the Scare prank).
+
+```markdown
 # 🛠️ xsvCommandCenter Developer Guide
 
 **Target Audience:** Hackers, Developers, and Future Ian.
@@ -11,12 +16,11 @@ The Ghost Shell (`src/commands/cmd_shell.py`) is an **Infinite Loop** that acts 
 ### The Routing Logic (Order of Operations)
 When you type a command (e.g., `ping`), the Shell follows this strict priority:
 
-1.  **Hardcoded Aliases:** Checks inside `cmd_shell.py` for immediate overrides (like `exit`, `clear`, `exec`).
-2.  **Internal Modules:** Checks `src/commands/` for a file named `cmd_ping.py`.
-    * *If found:* It imports the module dynamically and runs `run(args)`.
-3.  **Magic Commands (JSON):** Checks `data/config/commands.json`.
-    * *If found:* It runs the script or alias defined there.
-4.  **System Fallback:** If nothing matches, it sends the text to the Host OS (Windows/Linux).
+1.  **Hardcoded Aliases:** Checks `cmd_shell.py` (exit, clear, exec, reload).
+2.  **System Modules:** Checks `src/commands/cmd_ping.py`.
+3.  **Custom Modules:** Checks `src/commands/custom/cmd_ping.py` (Your Playground).
+4.  **Magic Commands (JSON):** Checks `data/config/commands.json` (Links to `library/`).
+5.  **System Fallback:** If nothing matches, it sends the text to the Host OS.
 
 ### The Three Modes of Execution
 | Mode | Syntax | Description | Use Case |
@@ -27,84 +31,108 @@ When you type a command (e.g., `ping`), the Shell follows this strict priority:
 
 ---
 
-## 🧩 2. How to Add Features (Modules vs. Scripts)
+## 🧩 2. How to Add Features (The New Way)
 
-### Method A: The Python Module (Power User)
-**Best for:** Complex tools, interactive menus, API integrations (AI, Web).
-1.  Create a file in `src/commands/` named `cmd_YOURNAME.py`.
-2.  Paste this template:
-    ```python
-    def run(args):
-        print("This is my new module!")
-        # Your python code here
-    ```
-3.  **Done.** Type `yourname` in the shell.
+### Method A: The Wizard (Recommended)
+Don't write files manually. Use the engine.
+1.  **Type:** `create command mytool`
+2.  **Enter Description:** "My cool tool"
+3.  **Paste Code:** Paste your Python logic.
+4.  **Result:** Auto-generates `src/commands/custom/cmd_mytool.py` with proper boilerplate.
 
-### Method B: The Magic Script (Quick Fix)
+### Method B: The Library Link (Scripts)
 **Best for:** Running a PowerShell/Bash script you found online.
-1.  Drop the script into `library/` (e.g., `library/fix_wifi.ps1`).
+1.  Drop the script into `library/` (e.g., `library/matrix.py`).
 2.  Open `data/config/commands.json`.
 3.  Add it:
     ```json
-    "wifi": {
+    "matrix": {
         "type": "script",
-        "path": "library/fix_wifi.ps1",
-        "description": "Fixes the WiFi adapter"
+        "path": "library/matrix.py",
+        "description": "The Matrix Effect"
     }
     ```
-4.  **Done.** Type `wifi` in the shell.
 
 ---
 
-## ⚡ 3. Aliases (Shortcuts)
-Aliases allow you to shorten long commands or complex flags. You define these in `data/config/commands.json`.
+## ⚠️ Coding Guidelines (Critical)
 
-### Example 1: Shortening a Command
-You want to type `g` instead of `git status`.
-```json
-"g": {
-    "type": "shell",
-    "cmd": "git status",
-    "description": "Git Status Shortcut"
-}
+### 1. GUI Tools Must Be Threaded
+If your command opens a window (like `tkinter` or `pygame`), you **MUST** run it in a separate thread, or it will freeze the Shell.
+
+**Bad Code:**
+```python
+root = tk.Tk()
+root.mainloop() # <--- FREEZES SHELL HERE
 
 ```
 
-### Example 2: Complex Arguments
+**Good Code:**
 
-You want to run a specific Nmap scan by just typing `scan`.
+```python
+import threading
+def popup():
+    root = tk.Tk()
+    root.mainloop()
 
-```json
-"scan": {
-    "type": "shell",
-    "cmd": "nmap -sV -p 1-1000 localhost",
-    "description": "Run local port scan"
-}
+t = threading.Thread(target=popup, daemon=True)
+t.start() # <--- Shell stays alive
 
 ```
 
-**Note:** The `commands.json` file is **Hot-Reloaded**. You can save the file and type the command immediately. No restart needed.
+### 2. File Paths
+
+Never hardcode `C:\Users`. Always use the `Path` library relative to `__file__`.
+
+```python
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+
+```
+
+```
 
 ---
 
-## ⚠️ Important Rules (Do Not Break These)
+### 3. `TODO.md` ( The Worklist )
+**Changes:** Massive update. Checked off the entire Phase 1. Added the Pivot explanation.
 
-1. **Never Edit `src/core/**` unless you are fixing a bug in the engine itself.
-2. **Naming Matters:** If you name a module `cmd_ipconfig.py`, you will shadow the Windows `ipconfig` command. (Use `exec ipconfig` to bypass your module).
-3. **Keep it Portable:** If writing Python modules, avoid `pip install` dependencies if possible. Use the standard library so it runs on any machine.
+```markdown
+# 📋 Project Worklist
+
+## 🔥 Phase 1: The Foundation (COMPLETED)
+- [x] **Modular Architecture:** Core (`src/commands`) vs. Custom (`src/commands/custom`).
+- [x] **Dynamic Router:** Auto-loads modules from both locations.
+- [x] **Hardware Detective:** `InfoEngine` scans CPU/RAM.
+- [x] **Ghost Shell:** Interactive terminal (`xsv@HOST >`) with sticky headers.
+- [x] **Launchers:** `LAUNCH.bat` (Windows).
+- [x] **The Creator:** `create` command with Dispatcher Pattern (routes to Todo/Journal).
+- [x] **The Editor:** `edit` command (detects VS Code/Notepad).
+- [x] **Hot Reload:** `reload` command updates code instantly.
+- [x] **Safety:** `exec` and `sh` escape hatches.
+
+## 🚧 Phase 2: The Toolbelt (Essential Modules)
+* **Current Focus: The Hacker Kit**
+- [ ] **`cmd_dev.py`**:
+    - [ ] Add `install vscode` (Windows/Linux detection).
+    - [ ] Add `install node` / `install python`.
+    - [ ] Add `sync settings` (VS Code extensions).
+- [ ] **`cmd_web.py`**:
+    - [ ] Add `serve` (Python `http.server` wrapper).
+    - [ ] Add `project init` (Download HTML5 boilerplate).
+- [ ] **`cmd_clean.py`**:
+    - [ ] Temp file wiper.
+    - [ ] Browser cache cleaner.
+
+## 🔭 Phase 3: Expansion (Advanced)
+- [ ] **`cmd_gameserver.py`**: Minecraft/Ark installers (Servers go to `data/servers`).
+- [ ] **`cmd_ai.py`**: Gemini API hook.
+- [ ] **ParrotOS Support**: Verify all scripts on Linux.
+- [ ] **Dashboard**: Future GUI skin.
+
+## 📜 Pivot Log (History)
+* *Pivoted `DependencyEngine` into `cmd_dev.py` for granular control.*
+* *Moved `INSTALL_THIS_PC.bat` logic into internal `setup` command.*
+* *Split `src/commands` to protect Core files from User scripts.*
 
 ```
 
-### 3. What is Next?
-You have the Core, the Shell, the Installer, the Settings, and the Documentation.
-
-**We are officially out of the "Infrastructure Phase" and into the "Creative Phase".**
-
-You can now start building the actual tools you wanted:
-* `cmd_dev.py` (Install VS Code).
-* `cmd_gameserver.py` (Minecraft).
-* `cmd_clean.py` (System cleanup).
-
-**Which one do you want to build first?**
-
-```

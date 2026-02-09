@@ -1,6 +1,6 @@
 # 🌌 xsvCommandCenter: The Digital Life Container
 
-**Version:** 5.4-Granular
+**Version:** ~~5.4-Granular~~ **6.0-Ghost**
 **Status:** Alpha / Active Development
 **Philosophy:** "One Stick, Any Computer, Surgical Precision."
 
@@ -21,57 +21,53 @@ It is designed to be the single repository for my entire digital life—my brain
 ### 1. The Core (`src/core/`)
 * **`InfoEngine`**: The Detective. Identifies Host OS, Hardware, and Cloud Drives.
 * **`HostEngine`**: The Worker. Handles file ops, process killing, and launching.
-* **`DependencyEngine` (Planned)**: Checks for installed tools (Node, Python, Git) before running scripts.
+* ~~**`DependencyEngine` (Planned)**~~ *Pivoted to `cmd_dev.py` (The Hacker Kit).*
 
 ### 2. The Dynamic Router (`src/main.py`)
 * **Auto-Discovery**: Automatically finds and loads any tool dropped into `src/commands/`.
-* **Zero-Bottleneck**: No hardcoded menus. You add a file, it works.
+* **NEW: Custom Partition**:
+    * `src/commands/` -> **System Tools** (Shell, Setup, Settings).
+    * `src/commands/custom/` -> **User Tools** (Scare, Games, AI).
 
 ### 3. The Interface
 * **Ghost Shell (`cmd_shell.py`)**: A persistent, interactive terminal (`xsv@HOST >`).
-* **GUI Dashboard (Planned)**: A future "Rich/Electron" skin for a visual Matrix-style control panel.
+    * **Features:** Hot Reload, Three-Mode Execution (Smart/Exec/Raw), and Threading support.
+* ~~**GUI Dashboard (Planned)**~~ *Moved to Phase 5 Roadmap.*
 
 ---
 
 ## 🔮 The Module Roadmap (Granular & Smart)
 
+### 🛠️ The "Ghost" Utilities (LIVE)
+* **The Factory (`cmd_create.py`)**:
+    * **Dispatcher Logic**: `create todo "Buy milk"` -> Routes to Todo Module.
+    * **Wizard**: `create command scare` -> Auto-generates Python boilerplate.
+* **The Editor (`cmd_edit.py`)**:
+    * Smart-detects VS Code, Notepad, or Nano to edit scripts on the fly.
+* **The Hot-Swap (`reload`)**:
+    * Updates code in memory without restarting the shell.
+
 ### 🛠️ Development (`cmd_dev.py`)
 * **Granular Installation**:
-    * `xsv dev install vscode`: Installs VS Code + My Extensions (checks OS first).
-    * `xsv dev install node`: Installs Node.js (via NVM or Choco).
-    * `xsv dev install all`: Installs the full suite (Git, VS Code, Python, Node).
+    * `dev install vscode`: Installs VS Code + My Extensions (checks OS first).
+    * `dev install all`: Installs the full suite (Git, VS Code, Python, Node).
 * **Environment Sync**:
-    * `xsv dev sync`: Pulls my latest VS Code settings/keybindings from Vault.
+    * `dev sync`: Pulls my latest VS Code settings/keybindings from Vault.
 
 ### 🌐 Web Server (`cmd_web.py`)
 * **Smart Launch**:
-    * `xsv web start`: Detects project type (HTML/React/PHP).
-    * *Logic:* "Oh, this is React? Do you have Node? No? I'll use a portable version."
-* **Quick Serve**:
-    * `xsv web serve .`: Instantly hosts current folder on LAN (using Python or Node).
+    * `web serve`: Instantly hosts current folder on LAN.
 
 ### 🎮 Gaming (`cmd_gameserver.py`)
 * **Game Server Deployer**:
     * One-click install/start for: Minecraft, Battlefield, Ark.
-    * *Feature:* Downloads server binaries to `library/games/` only when requested.
-* **Pixel Game Engine**:
-    * Built-in Python games (Snake/Tetris) inside the shell.
+    * **Storage**: Servers live in `data/servers/`, NOT in the source code.
 
 ### 🕵️ Cybersecurity & Diagnostics
 * **The "Analyst" (`cmd_scan.py`)**:
-    * Deep diagnostics: Event Logs, Network Traffic, Hidden Users.
-* **"Hack the Box" Mode**:
-    * ParrotOS/Kali integration. Automated pentesting setup.
-* **"The Cleaner" (`cmd_nuke.py`)**:
+    * Deep diagnostics: Event Logs, Network Traffic.
+* **"The Cleaner" (`cmd_clean.py`)**:
     * Wipes temp files, clears logs, removes traces.
-
-### 🤖 AI Integration (`cmd_ai.py`)
-* **The Oracle**:
-    * Direct hook into Gemini/Perplexity APIs.
-    * `xsv ask "How do I fix this registry error?"`
-
-### 🎭 Mischief (`cmd_prank.py`)
-* **Prank Module**: Harmless scripts (Mouse jitter, fake updates) for family/friends.
 
 ---
 
@@ -79,8 +75,10 @@ It is designed to be the single repository for my entire digital life—my brain
 
 | Zone | Content | Storage Location |
 | :--- | :--- | :--- |
-| **🟢 GREEN (Public)** | Source Code, Game Installers, Public Scripts | **GitHub** |
-| **🔴 RED (Private)** | Journals, Client Passwords, API Keys, `user_settings.json` | **OneDrive / USB** |
+| **SYSTEM** | Core Logic, Router, Base Modules | `src/commands/` |
+| **USER** | Custom Scripts, Pranks, Tools | `src/commands/custom/` |
+| **LIBRARY** | 3rd Party Scripts (Bash/PS1) | `library/` (Linked via JSON) |
+| **DATA** | Game Servers, Vault, Databases | `data/` |
 
 ---
 
@@ -88,5 +86,5 @@ It is designed to be the single repository for my entire digital life—my brain
 1.  **Plug in USB.**
 2.  **Double-click `LAUNCH.bat`.**
 3.  **Login** (Secure Shell opens).
-4.  **Command:** `dev install vscode` (Surgical install).
-5.  **Command:** `web serve` (Instant preview).
+4.  **Command:** `setup` (Installs shortcuts/path).
+5.  **Command:** `create command mytool` (Builds a new tool).
