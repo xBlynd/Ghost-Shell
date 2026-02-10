@@ -49,3 +49,15 @@
 - [ ] **Dashboard**: Future GUI skin.
 - [ ] Google Search
 - [ ] Weather
+
+
+## 🐧 The Linux Factor (Important)(Discovered or reminded in the Reminder Module.)
+Since you want this portable to Linux, notify-send is the standard tool, but it isn't always installed by default on minimal server installs (though it is on most desktops like Ubuntu/Debian).
+
+When you eventually run your Install/Setup script on the host machine, you will need to ensure this package is present.
+
+Debian/Ubuntu: sudo apt install libnotify-bin
+
+Arch: sudo pacman -S libnotify
+
+If it's missing, the new code will just print [Linux Alert] to the terminal so the system doesn't crash.
