@@ -27,3 +27,22 @@
 - [ ] **`cmd_ai.py`**: Gemini API hook.
 - [ ] **ParrotOS Support**: Verify all scripts on Linux.
 - [ ] **Dashboard**: Future GUI skin.
+
+## 🔭 CORE and ENGINE (Advanced)
+- [ ] **Status System**
+  - [ ] Testing each command to make sure they work.
+- [ ] **DEV MODE**:
+- [ ] **Search**
+- [ ] Security
+- [ ] Relative Time Support: ReminderEngine.parse_time()
+  - [ ] adding reminders like "Remind me in 10minutes". Our ReminderEngine needs a Time Parser to convert "10m" or "1h" or "10sec" into a hard timestamp for the JSON vault.
+- [ ] USB Autoloader(Plug in usb and terminal popup)
+
+
+## 🔭 SCRIPTS or IDEAS or COMMANDS: Expansion (Advanced)
+- [ ] **`cmd_gameserver.py`**: Minecraft/Ark installers.
+- [ ] **`cmd_ai.py`**: Gemini API hook.
+- [ ] **ParrotOS Support**: Verify all scripts on Linux.
+- [ ] **Dashboard**: Future GUI skin.
+- [ ] Google Search
+- [ ] Weather

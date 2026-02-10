@@ -6,6 +6,7 @@ import os
 import subprocess
 from datetime import datetime
 from src.core.vault_api import VaultAPI
+from datetime import datetime, timedelta
 
 class ReminderEngine:
     @staticmethod
@@ -46,3 +47,22 @@ class ReminderEngine:
                 t['notified'] = True
                 break
         v.save_tasks(category, tasks)
+
+    class ReminderEngine:
+        @staticmethod
+        def parse_time(time_input):
+            """Converts '10m', '1h', or '20:00' into a standard HH:MM string."""
+            if not time_input: return None
+            now = datetime.now()
+            
+            try:
+                if time_input.endswith('m'):
+                    minutes = int(time_input[:-1])
+                    return (now + timedelta(minutes=minutes)).strftime("%H:%M")
+                if time_input.endswith('h'):
+                    hours = int(time_input[:-1])
+                    return (now + timedelta(hours=hours)).strftime("%H:%M")
+                # Fallback for standard 24hr time
+                return time_input 
+            except:
+                return None

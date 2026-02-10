@@ -58,8 +58,9 @@ def reminder_worker():
 def run(args):
     if not login(): return
     
-    # Start the background thread
-    t = threading.Thread(target=reminder_worker, daemon=True)
+# --- START THE HEARTBEAT ---
+    # We name it here so the 'status' command can find it by name
+    t = threading.Thread(target=reminder_worker, daemon=True, name="ReminderPulse")
     t.do_run = True
     t.start()
     

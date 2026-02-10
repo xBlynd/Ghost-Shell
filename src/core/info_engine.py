@@ -1,111 +1,48 @@
-import platform
-import subprocess
-import json
-import os
+import importlib
+import py_compile
+import sys
 from pathlib import Path
 
 class InfoEngine:
+    # ... keep your existing get_cloud_paths and scan_windows_deep ...
+
     @staticmethod
-    def get_cloud_paths():
-        """Detects Cloud Storage Mounts"""
-        home = Path.home()
-        clouds = []
+    def verify_all_commands(verbose_callback=None):
+        import py_compile
+        root = Path(__file__).parent.parent
+        cmd_dir = root / "commands"
+        custom_dir = cmd_dir / "custom"
+        # Adjusted path to ensure 'library' is found in the project root
+        lib_dir = root.parent / "library"
         
-        # 1. OneDrive
-        onedrive = os.environ.get("OneDrive")
-        if onedrive and Path(onedrive).exists():
-            clouds.append({"name": "OneDrive", "path": onedrive})
+        results = {"SYSTEM": [], "CUSTOM": [], "LIBRARY": []}
+        
+        def check_syntax(file_path, cat):
+            name = file_path.stem.replace("cmd_", "")
+            # Send immediate feedback to the terminal if callback exists
+            if verbose_callback:
+                verbose_callback(f"  [TESTING] {cat:<7} -> {name:<12}")
             
-        # 2. Google Drive (Virtual G: or Folder)
-        gdrive = home / "Google Drive"
-        if gdrive.exists(): 
-            clouds.append({"name": "Google Drive", "path": str(gdrive)})
-        
-        # Check for Virtual Drives (G:)
-        if os.name == "nt":
-            if Path("G:/").exists():
-                clouds.append({"name": "Google Drive (Virtual)", "path": "G:/"})
+            try:
+                py_compile.compile(str(file_path), doraise=True)
+                return (name, "✅ OK")
+            except Exception as e:
+                return (name, f"❌ BROKEN: {str(e).split(':')[-1].strip()}")
 
-        return clouds
-
-    @staticmethod
-    def scan_windows_deep():
-        # The 'CPU-Z' Style Scanner using PowerShell
-        ps_script = r"""
-        $ErrorActionPreference = "SilentlyContinue"
-
-        # --- MOTHERBOARD & BIOS ---
-        $bios = Get-CimInstance Win32_BIOS
-        $base = Get-CimInstance Win32_BaseBoard
-        $cs = Get-CimInstance Win32_ComputerSystem
-
-        # --- CPU DETAIL ---
-        $cpu = Get-CimInstance Win32_Processor
-        
-        # --- RAM DETAILED (Stick by Stick) ---
-        $mem = Get-CimInstance Win32_PhysicalMemory | Select-Object Manufacturer, PartNumber, Speed, Capacity, DeviceLocator
-
-        # --- GPU DETAILED ---
-        $gpu = Get-CimInstance Win32_VideoController | Select-Object Name, VideoProcessor, DriverVersion, AdapterRAM, CurrentRefreshRate
-
-        # --- STORAGE (NVMe/SSD distinction) ---
-        $disk = Get-PhysicalDisk | Select-Object FriendlyName, MediaType, BusType, Size, Model, FirmwareVersion
-
-        # --- NETWORK (MAC & Connection) ---
-        $net = Get-NetAdapter | Where-Object Status -eq 'Up' | Select-Object Name, InterfaceDescription, MacAddress, LinkSpeed
-
-        # --- USB DEVICES (Coolers/Hubs) ---
-        # Looking for specific enthusiast gear
-        $usb = Get-PnpDevice -Class 'USB', 'HIDClass' -Status 'OK' | Where-Object { $_.FriendlyName -match 'Corsair|NZXT|Liquid|Pump|AIO|Cooler|Hub|Commander|Link|Kraken' } | Select-Object FriendlyName
-
-        $info = @{
-            System = @{
-                Hostname = $cs.Name
-                Model = $cs.Model
-                Manufacturer = $cs.Manufacturer
-            }
-            BIOS = @{
-                Version = $bios.SMBIOSBIOSVersion
-                Date = $bios.ReleaseDate
-                Serial = $bios.SerialNumber
-            }
-            Mobo = @{
-                Make = $base.Manufacturer
-                Model = $base.Product
-                Serial = $base.SerialNumber
-            }
-            CPU = @{
-                Name = $cpu.Name
-                Cores = $cpu.NumberOfCores
-                Threads = $cpu.NumberOfLogicalProcessors
-                Socket = $cpu.SocketDesignation
-            }
-            RAM_Sticks = @($mem)
-            GPUs = @($gpu)
-            Disks = @($disk)
-            Network = @($net)
-            Cooling = @($usb)
-        }
-        $info | ConvertTo-Json -Depth 4 -Compress
-        """
-        try:
-            res = subprocess.check_output(["powershell", "-NoProfile", "-Command", ps_script], encoding="utf-8", errors="ignore")
-            return json.loads(res)
-        except Exception as e:
-            return {"Error": str(e)}
-
-    @staticmethod
-    def get_report():
-        """Orchestrates the scan based on OS"""
-        info = {
-            "OS_Type": platform.system(),
-            "Cloud": InfoEngine.get_cloud_paths(),
-            "Data": {}
-        }
-        
-        if info["OS_Type"] == "Windows":
-            info["Data"] = InfoEngine.scan_windows_deep()
-        elif info["OS_Type"] == "Linux":
-            info["Data"] = {"Status": "Basic Linux Scan (TODO: Implement lscpu)"}
+        # 1. System Commands
+        for f in cmd_dir.glob("cmd_*.py"):
+            results["SYSTEM"].append(check_syntax(f, "SYSTEM"))
             
-        return info
+        # 2. Custom Commands
+        if custom_dir.exists():
+            for f in custom_dir.glob("cmd_*.py"):
+                results["CUSTOM"].append(check_syntax(f, "CUSTOM"))
+
+        # 3. Library Items (Restoring Library Visibility)
+        if lib_dir.exists():
+            for f in lib_dir.glob("*.*"):
+                if verbose_callback:
+                    verbose_callback(f"  [CHECK]   LIBRARY -> {f.name:<12}")
+                results["LIBRARY"].append((f.name, "✅ FOUND"))
+                
+        return results

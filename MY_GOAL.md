@@ -1,0 +1,1 @@
+# This document highlights my overall goal and history of this item.  I NEVER want to lose site of how i will use this thing daily.  And i NEVER want to restrict adding ANYTHING to it in the future.  EVER.
