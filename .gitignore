@@ -7,3 +7,7 @@ __pycache__/
 
 # --- BUT KEEP THE SKELETON ---
 !data/config/commands.json
+
+# Google Drive Garbage
+desktop.ini
+[Dd]esktop.ini
