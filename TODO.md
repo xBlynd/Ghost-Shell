@@ -39,6 +39,9 @@
 - [ ] USB Autoloader(Plug in usb and terminal popup)
 
 
+## DIAGNOSTIC / HACK THE BOX / HOST ITs
+- [ ] Network issues.  Observing latency issues in Rocket League.  want to know why.  Network monitoring(live), etc in host machine for troubleshooting and fixing.
+
 ## 🔭 SCRIPTS or IDEAS or COMMANDS: Expansion (Advanced)
 - [ ] **`cmd_gameserver.py`**: Minecraft/Ark installers.
 - [ ] **`cmd_ai.py`**: Gemini API hook.

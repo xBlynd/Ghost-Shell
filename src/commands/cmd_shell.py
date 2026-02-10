@@ -32,7 +32,6 @@ def login():
 
 def reminder_worker():
     """The Background Heartbeat Thread."""
-    # We use a global variable so we can 'kill' the thread logic on reload
     while getattr(threading.current_thread(), "do_run", True):
         try:
             cfg_path = Path(__file__).parent.parent.parent / "data" / "config" / "reminders.json"
@@ -40,8 +39,7 @@ def reminder_worker():
             if cfg_path.exists():
                 with open(cfg_path, "r") as f: cfg = json.load(f)
 
-            # Reload the engine logic dynamically inside the thread
-            importlib.reload(sys.modules['src.core.reminder_engine'])
+            # Reload logic removed from here to keep heartbeat stable
             from src.core.reminder_engine import ReminderEngine
             
             due = ReminderEngine.check_reminders()
@@ -58,8 +56,7 @@ def reminder_worker():
 def run(args):
     if not login(): return
     
-# --- START THE HEARTBEAT ---
-    # We name it here so the 'status' command can find it by name
+    # --- START THE HEARTBEAT ---
     t = threading.Thread(target=reminder_worker, daemon=True, name="ReminderPulse")
     t.do_run = True
     t.start()
@@ -88,37 +85,45 @@ def run(args):
                 except Exception as e: print(f"❌ {e}")
                 continue
 
+            # --- SMART RELOAD LOGIC ---
             if cmd == "reload":
-                # Kill existing thread logic before reloading
-                t.do_run = False
-                importlib.invalidate_caches()
-                print("♻️  System Reloaded. Heartbeat Reseting...")
-                # Restart the thread
-                t = threading.Thread(target=reminder_worker, daemon=True)
-                t.do_run = True
-                t.start()
+                if cmd_args:
+                    # Target specific module (e.g., 'reload todo')
+                    target = cmd_args[0]
+                    found = False
+                    for mod_name in list(sys.modules.keys()):
+                        if mod_name.endswith(f"cmd_{target}"):
+                            importlib.reload(sys.modules[mod_name])
+                            print(f"✅ Reloaded module: {mod_name}")
+                            found = True
+                    if not found:
+                        print(f"⚠️  '{target}' not in memory. It will load fresh on next use.")
+                else:
+                    # Full System Reload
+                    t.do_run = False
+                    importlib.invalidate_caches()
+                    print("♻️  System Reloaded. Heartbeat Reseting...")
+                    t = threading.Thread(target=reminder_worker, daemon=True, name="ReminderPulse")
+                    t.do_run = True
+                    t.start()
                 continue
 
             # --- SMART ROUTER ---
-            # 1. System
             try:
                 module = importlib.import_module(f"src.commands.cmd_{cmd}")
                 module.run(cmd_args)
                 continue
             except ModuleNotFoundError: pass 
 
-            # 2. Custom
             try:
                 module = importlib.import_module(f"src.commands.custom.cmd_{cmd}")
                 module.run(cmd_args)
                 continue
             except ModuleNotFoundError: pass 
 
-            # 3. Library Fallback
             launcher = cmd_launcher.Launcher()
             if launcher.run(cmd, cmd_args): continue
 
-            # 4. OS Fallback
             subprocess.run(user_input, shell=True)
 
         except KeyboardInterrupt:
