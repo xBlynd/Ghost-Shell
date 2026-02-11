@@ -136,3 +136,20 @@
 * **Vault Monitoring** - Monitor the status of EVERYTHING vault.
 * **Ghost Monitoring** - Monitor Ghost and Rogue Modes
 * **Shadow Monitoring** - Monitor all shadow actions done with the Blackbox items.
+
+
+
+
+
+### NOTES AND/OR COMMENTS
+- I want to have a map for the commands and under which item(engine or core) it is held or derives from.  Think this will help me and other visually see whats happening too.
+
+###  ORGANIZE UNDER OR CREATE ENGINES
+- I want to have a map for the commands and under which item it is held or derives from.
+- Installer, where are we located and how is this managed?
+- Loaders screens(Pre-loaders, Login, system startup, etc)
+- The "Ghost" Shell itself.  And its appearance, do we keep that in the same location or seperate into interface?
+- Our python, where is that held at?
+- "Ghost Shell Settings" - Where does this fall under and how do we make sure all the engines settings get into this as well?
+- Document library and handling me draging ANY file i want into my document library and the system knowing it.
+- Syncing the "core" vs the "private files needs to be identified somewhere."
