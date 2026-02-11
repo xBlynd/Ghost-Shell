@@ -55,19 +55,29 @@ xsvGhost-Shell/
 ### What Needs to Happen
 
 
-### 👻 THE 11 ENGINES - Your Arsenal
+### 🗺️ THE 11 ENGINES - Authoritative List
 
-1. 👻 **The GhostCoreEngine** (The Kernel) - Core system initialization and bootstrapping
-2. 🛡️ **The SecurityEngine** (The Gatekeeper) - Access control, authentication, vault encryption
-3. 💗 **The HeartbeatEngine** (The Pulse) - System health monitoring and watchdog functionality
-4. ⏰ **The TimeEngine** (The Scheduler) - Event scheduling, reminders, cron-like task execution
-5. 🌐 **The WebServer** (The Bridge) - HTTP server, REST API, web-based command execution
-6. 📡 **The HostEngine** (The Dispatcher) - IPC, network sockets, remote command execution
-7. 🗂️ **The LoaderEngine** (The Librarian) - Dynamic module loading, plugin architecture, hot-reloading
-8. 📊 **The InfoEngine** (The Observer) - System info gathering, config management, diagnostics
-9. 🔔 **The ReminderEngine** (The Heartbeat) - Background reminders, event notifications, scheduled alerts
-10. 🏦 **The VaultEngine** (The Keeper) - Secure credential storage, encryption/decryption, key management
-11. ⚙️ **The HostBridge** (The Connector) - Process management, connectivity, auto-discovery, network bridging
+1. 👻 **The GhostCoreEngine** (The Kernel) - The Brain & Environment Detector. Identifies Host OS and loads config.
+
+2. 🛡️ **The ShieldEngine** (The Gatekeeper) - Defense & Authentication. Manages login, vault encryption key, session security.
+
+3. 👻 **The GhostEngine** (The Phantom) - Offensive Stealth & Anti-Forensics. Zero Footprint operations, active stealth, anti-forensics.
+
+4. 📡 **The BlackBoxEngine** (The Shadow Network) - Network Dominance & Forensics. Incognito search, traffic interception, SSH tunneling.
+
+5. ⚡ **The RootEngine** (The Mechanic) - Host Control / God Mode. System tuning, process termination, hardware ID spoofing.
+
+6. ⏳ **The PulseEngine** (The Timekeeper) - Scheduling & Consciousness. Cron-style jobs, relative time parsing, toast notifications.
+
+7. 📚 **The VaultEngine** (The Librarian) - Data Management. CRUD operations, search index, structure repair, encryption hook.
+
+8. 🔄 **The SyncEngine** (The Bridge) - Data Transport. Moving data between USB, Host, Cloud. Mirroring and silent transfer.
+
+9. 📺 **The InterfaceEngine** (The Face) - UI, Help, and Alias Manager. Help generation, alias management, theming, loaders.
+
+10. 🧩 **The LoaderEngine** (The Nervous System) - Expansion & Routing. Hot-swap command loading, manifest parsing, dependency checking.
+
+11. 💓 **The HeartbeatEngine** (The Immune System) - Vital Signs & Diagnostics. Self-healing, integrity pulse, crash handler, monitoring.
 **PHASE: GET THE SHELL WORKING**
 
 1. **Verify System Startup**
@@ -201,7 +211,7 @@ python src/main.py help shell
 - LoaderEngine discovers and runs scripts from /library/
 - ReminderPulse is background event system
 
-### The 11 Engines (Confirmed Correct)
+### 58 (Confirmed Correct)
 
 1. 👻 **GhostCoreEngine** - Kernel/initialization
 2. 🛡️ **SecurityEngine** - Authentication/vault
