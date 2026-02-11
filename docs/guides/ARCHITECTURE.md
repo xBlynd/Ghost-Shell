@@ -6,82 +6,96 @@ Ghost Shell is a portable, command-driven operating system shell designed for ad
 
 ## Core Architecture
 
-### 1. **The Kernel** (kernel.py)
-- Central orchestration engine that manages all system operations
-- Handles engine initialization and lifecycle management
-- Routes commands to appropriate modules
-- Manages inter-engine communication
-- Provides core utilities: path management, module discovery, sys.path updates
+**Version:** v6.0-Ghost-Kernel
+**Status:** AUTHORITATIVE
 
-### 2. **The 11 Core Engines**
+---
 
-Ghost Shell uses 11 specialized engines, each with a specific responsibility:
+## 1. The 11 Core Engines (The Truth)
 
-#### 👻 **The GhostCoreEngine** (The Kernel)
-- Core system initialization and bootstrapping
-- System state management
-- Recovery and restart mechanisms
+These are the **ONLY** recognized engines. Any reference to "ShieldEngine", "BlackSmithEngine", or "RoofEngine" is an error and must be purged.
 
-#### 🛡️ **The SecurityEngine** (The Gatekeeper)
-- Access control and authentication
-- Vault encryption and decryption
-- Permission management
-- Session security validation
+### 💀 1. GhostCoreEngine (The Kernel)
+* **Role:** The Brain & Environment Detector.
+* **Touchpoint:** The "God Object" initialized in `main.py`.
+* **Responsibilities:** OS Detection, Config Loading, Dependency Checks.
 
-#### 💗 **The HeartbeatEngine** (The Pulse)
-- System health monitoring
-- Alive signal broadcasting
-- Watchdog functionality
-- Status polling and reporting
+### 🛡️ 2. SecurityEngine (The Gatekeeper)
+* **Role:** Defense & Authentication.
+* **Responsibilities:** Login, Keyfile Checks, Fernet Key Management (RAM only).
+* **Note:** This is **NOT** "ShieldEngine".
 
-#### ⏰ **The TimeEngine** (The Scheduler)
-- Event scheduling and timing
-- Reminders and notifications
-- Cron-like task execution
-- Temporal event management
+### 👻 3. GhostEngine (The Phantom)
+* **Role:** Offensive Stealth & Anti-Forensics.
+* **Responsibilities:** PID Spoofing, Timestomping, Trace Wiping (`clean`).
 
-#### 🌐 **The WebServer** (The Bridge)
-- HTTP server for remote access
-- REST API endpoint management
-- Route handling and request processing
-- Web-based command execution
+### 📡 4. BlackBoxEngine (The Shadow Network)
+* **Role:** Network Dominance & Forensics.
+* **Responsibilities:** Jitter Logging, Incognito Search, Promiscuous Mode.
 
-#### 📡 **The HostEngine** (The Dispatcher)
-- Inter-process communication
-- Network socket management
-- Remote command execution
-- Host bridging capabilities
+### ⚡ 5. RootEngine (The Mechanic)
+* **Role:** Host Control / God Mode.
+* **Responsibilities:** Registry Hacks, Process Killing, Hardware ID Spoofing.
+* **Note:** This replaces the old "HostEngine".
 
-#### 🗂️ **The LoaderEngine** (The Librarian)
-- Dynamic module loading
-- Plugin architecture support
-- Code hot-reloading
-- Dependency management
+### ⏳ 6. PulseEngine (The Timekeeper)
+* **Role:** Scheduling & Consciousness.
+* **Responsibilities:** Cron jobs, Relative Time parsing (`10m`), Toast Notifications.
 
-#### 📊 **The InfoEngine** (The Observer)
-- System information gathering
-- Configuration management
-- Diagnostic data collection
-- Performance metrics tracking
+### 📚 7. VaultEngine (The Librarian)
+* **Role:** Data Management.
+* **Responsibilities:** CRUD for Notes/Journals, Search Indexing, Encryption Hooks.
 
-#### 🔔 **The ReminderEngine** (The Heartbeat)
-- Background reminder system
-- Event notifications
-- Scheduled alerts
-- User notifications and callbacks
+### 🔄 8. SyncEngine (The Bridge)
+* **Role:** Data Transport.
+* **Responsibilities:** Mirroring (Host <-> USB), Silent Transfer (`ghost cp`).
 
-#### 🏦 **The VaultEngine** (The Keeper)
-- Secure credential storage
-- Encryption/decryption operations
-- Key management
-- Secret rotation
+### 📺 9. InterfaceEngine (The Face)
+* **Role:** UI, Help, and Alias Manager.
+* **Responsibilities:** Help Menu Generation, Themes, Spinners.
 
-#### ⚙️ **The HostBridge** (The Connector)
-- System process management
-- Host connectivity layer
-- Auto-discovery capabilities
-- Network bridging
+### 🧩 10. LoaderEngine (The Nervous System)
+* **Role:** Expansion & Routing.
+* **Responsibilities:** Hot-Swap Command Loading, Manifest Parsing.
 
+### 💓 11. HeartbeatEngine (The Immune System)
+* **Role:** Vital Signs & Diagnostics.
+* **Responsibilities:** Self-Healing, Integrity Checks, Crash Handling.
+
+---
+
+## 2. The Interaction Matrix (Touchpoints)
+
+### 🕵️ Stealth Operations
+* **Commands:** `ghost cp`, `clean`, `incognito`
+* **Engines:** GhostEngine (Hide PID), RootEngine (Wipe Logs), VaultEngine (Store Loot)
+
+### 📡 Network Operations
+* **Commands:** `scan`, `ping`, `netmon`
+* **Engines:** BlackBoxEngine (Sockets), RootEngine (Raw Packet), InterfaceEngine (Graphs)
+
+### 🔐 Security Operations
+* **Commands:** `login`, `lock`, `encrypt`
+* **Engines:** SecurityEngine (Auth), GhostCore (Session), InterfaceEngine (Masked Input)
+
+### 📝 Data Operations
+* **Commands:** `note`, `journal`, `search`
+* **Engines:** VaultEngine (CRUD), SyncEngine (Mirroring), SecurityEngine (Decrypt)
+
+---
+
+## 3. The Core Rules
+1.  **No Direct Print:** Engines never print to screen. They return data. Commands print.
+2.  **No Direct File Access:** Only `VaultEngine` opens files in `data/vault`.
+3.  **No Hardcoded Paths:** All paths must be relative to `ROOT`.
+4.  **Manifest Protocol:** Every command MUST have a `MANIFEST` dict for the Help System.
+
+## 4. Folder Map
+* `/bin/` -> Portable Python Runtime
+* `/src/core/` -> The 11 Engines
+* `/src/commands/` -> The Interface Layer
+* `/data/vault/` -> Encrypted User Data
+* `/docs/` -> The Constitution (Public)
 ## System Layers
 
 ```
