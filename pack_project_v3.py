@@ -1,7 +1,31 @@
+#!/usr/bin/env python3
+"""
+WRAITH - Project Source Exporter
+==================================
+
+Part of the WRAITH toolkit for Git & GitHub documentation.
+
+Exports entire project source code into dual formats:
+- Human-readable with navigation and organization
+- AI-optimized with flat, parseable structure
+
+GitHub: https://github.com/xBlynd/wraith
+Author: Ian Martin (@xBlynd) - xsvStudio, LLC
+License: MIT
+
+Usage:
+    python pack_project.py
+
+Outputs:
+    - PROJECT_HUMAN_READABLE.md
+    - PROJECT_AI_OPTIMIZED.md
+"""
+
 import os
 import ast
 import time
 from pathlib import Path
+
 
 # ---------------------------------------------------------
 # CONFIGURATION
