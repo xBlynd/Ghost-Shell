@@ -8,6 +8,40 @@
 
 ---
 
+## 📚 Documentation Hub (Read The Docs)
+
+### 🔗 ESSENTIAL LINKS
+
+**📄 System Documentation**
+- **[SYSTEM_STRUCTURE_AND_DATA_FLOW.md](./SYSTEM_STRUCTURE_AND_DATA_FLOW.md)** - Complete folder structure, Data Hub, Sync System
+- **[🗺️ The Ghost System Atlas - Engine Map.md](./%F0%9F%97%BA%EF%B8%8F%20The%20Ghost%20System%20Atlas%20-%20Engine%20Map.md)** - AUTHORITATIVE engine definitions (11 engines with roles)
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture overview (⚠️ NOTE: Engines need update to match Engine Map)
+
+**🚀 Getting Started**
+- **[getting-started.md](./getting-started.md)** - Beginner guide
+- **[commands.md](./commands.md)** - Complete command reference
+
+**🔐 Advanced Topics**
+- **[SECURITY.md](./SECURITY.md)** - Security architecture & best practices
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Debugging & solutions
+
+**📚 AI Session & Development**
+- **[AI/THREAD_TAKEOVER_MASTER.md](./AI/THREAD_TAKEOVER_MASTER.md)** - AI handoff & session context
+- **[AI/SESSION_WORK_SUMMARY.md](./AI/SESSION_WORK_SUMMARY.md)** - Latest session completion report
+
+### 🎯 QUICK NAVIGATION
+
+| Section | Purpose |
+|---------|----------|
+| **System Architecture** | How Ghost Shell is organized internally |
+| **Engines (11)** | The core components powering Ghost Shell |
+| **Data & Sync** | How your personal data syncs across devices |
+| **Commands** | All available commands & their usage |
+| **Security** | Encryption, authentication, vault management |
+| **Getting Started** | First-time setup and basic usage |
+
+
+
 ## What is Ghost Shell?
 
 Ghost Shell is a **portable operating environment** that lives on a USB stick or Git repository. It's designed to be your complete digital workspace that runs on any machine (Windows, Linux, Mac) without installation.
