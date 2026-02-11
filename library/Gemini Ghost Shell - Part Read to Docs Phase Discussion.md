@@ -1962,7 +1962,11 @@ Once running, the **`PulseEngine`** starts a background thread (The Heartbeat). 
 This architecture allows the Ghost Shell to be **Self-Healing** and **Persistent**, maintaining control of the environment until you decide to pull the plug.
 
 ========================================
+you gave me a file that was changed again.  Had to edit it again.....  watch it....
 
+ok now i added these files and sent them to github.  @Google Drive has them as well.  
+
+Our roadmap is defintely lacking.  And again.  we did not include a lot of the beef into each item to give guidance to each thing we talked about that is NOT yet in the build.......  Thats a bummer.
 
 ========================================
 
