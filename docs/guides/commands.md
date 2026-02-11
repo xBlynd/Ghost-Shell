@@ -33,7 +33,7 @@ Complete reference for all Ghost Shell commands and functions.
 Manage Ghost Shell engines at runtime.
 
 **Usage:**
-```bash
+```
 engine status                  # Show all engine states
 engine list                    # List available engines
 engine enable <name>           # Enable an engine
@@ -44,7 +44,7 @@ engine logs <name>             # View engine logs
 ```
 
 **Examples:**
-```bash
+```
 engine status                  # View health of all engines
 engine info vault              # Detailed vault engine info
 engine enable ghost            # Turn on stealth operations
@@ -66,7 +66,7 @@ engine logs ghost              # View ghost engine logs
 Display Ghost Shell version and build information.
 
 **Usage:**
-```bash
+```
 version                        # Show version info
 version --full                 # Detailed version info
 version --check                # Check for updates
@@ -88,7 +88,7 @@ Uptime: 2h 34m
 Fix common issues and rebuild structures.
 
 **Usage:**
-```bash
+```
 repair                         # Full system repair
 repair --cache                 # Clear Python cache only
 repair --vault                 # Rebuild vault structure
@@ -107,7 +107,7 @@ repair --verify                # Verify integrity only
 - Validates module integrity
 
 **Examples:**
-```bash
+```
 repair                         # Auto-fix detected issues
 repair --verify                # Check for problems
 repair --vault                 # Fix vault issues
@@ -122,7 +122,7 @@ repair --all                   # Nuclear option - full rebuild
 **The master diagnostic command that checks EVERYTHING in Ghost Shell.**
 
 **Usage:**
-```bash
+```
 status                         # Full system diagnostic
 status --verbose               # Maximum detail output
 status --quick                 # Fast essential checks
@@ -134,7 +134,7 @@ status --watch                 # Live monitoring mode
 **Status Categories Checked:**
 
 #### 1. System Health
-```bash
+```
 status system                  # OS and Python environment
 status system --cpu            # CPU usage and load
 status system --memory         # Memory utilization
@@ -151,7 +151,7 @@ status system --disk           # Disk space and I/O
 - Environment variables
 
 #### 2. Engine Status
-```bash
+```
 status engines                 # All engines overview
 status engine <name>           # Specific engine details
 status engine vault --deep     # Deep engine diagnostics
@@ -168,7 +168,7 @@ status engine vault --deep     # Deep engine diagnostics
 - Health score (0-100)
 
 #### 3. Module Integrity
-```bash
+```
 status modules                 # All command modules
 status module <name>           # Specific module check
 status modules --validate      # Deep validation
@@ -185,7 +185,7 @@ status modules --validate      # Deep validation
 - Error history
 
 #### 4. Vault Status
-```bash
+```
 status vault                   # Vault system check
 status vault --keys            # List all stored keys
 status vault --integrity       # Verify encryption
@@ -202,7 +202,7 @@ status vault --size            # Storage usage
 - Lock status
 
 #### 5. Network Status
-```bash
+```
 status network                 # Network connectivity
 status network --speed         # Connection speed test
 status network --endpoints     # Check all endpoints
@@ -218,7 +218,7 @@ status network --endpoints     # Check all endpoints
 - Latency measurements
 
 #### 6. Configuration Status
-```bash
+```
 status config                  # Configuration validation
 status config --list           # Show all settings
 status config --defaults       # Compare to defaults
@@ -233,7 +233,7 @@ status config --defaults       # Compare to defaults
 - Backup availability
 
 #### 7. Data Status
-```bash
+```
 status data                    # All data systems
 status todos                   # Todo list status
 status notes                   # Notes system status
@@ -249,7 +249,7 @@ status custom                  # Custom commands
 - Storage usage
 
 #### 8. Performance Metrics
-```bash
+```
 status performance             # Performance overview
 status perf --benchm           # Run benchmarks
 status perf --history          # Historical data
@@ -264,7 +264,7 @@ status perf --history          # Historical data
 - Cache hit rates
 
 **Complete Status Output Example:**
-```bash
+```
 $ status --verbose
 
 ╔══════════════════════════════════════════════════════════╗
@@ -343,7 +343,7 @@ Next Auto-Check: 01:33:45 EST
 ```
 
 **Individual Status Checks:**
-```bash
+```
 # Check specific subsystems
 status engine vault            # Just vault engine
 status module cmd_todo         # Just todo module
@@ -375,7 +375,7 @@ status --email admin@example   # Email status report
 **The Inspector Engine - Complete help and documentation system.**
 
 **Usage:**
-```bash
+```
 help                           # Interactive help menu
 help mmand>                 # Show command help
 help --list                    # List all commands
@@ -385,7 +385,7 @@ help --inspector               # Open help inspector
 ```
 
 **Interactive Help Menu:**
-```bash
+```
 $ help
 
 ╔══════════════════════════════════════════════════════════╗
@@ -418,7 +418,7 @@ Navigation:
 ```
 
 **Detailed Command Help:**
-```bash
+```
 $ help vault
 
 ╔══════════════════════════════════════════════════════════╗
@@ -464,28 +464,28 @@ Press 'q' to quit, 'Enter' for more examples...
 **Help Inspector Features:**
 
 #### 1. Command Search
-```bash
+```
 help --search encryption       # Find all encryption-related
 help --search "api key"        # Search with phrases
 help --search vault            # Find vault references
 ```
 
 #### 2. Category Browser
-```bash
+```
 help --category system         # All system commands
 help --category security       # All security commands
 help --category dev            # All developer commands
 ```
 
 #### 3. Quick Reference
-```bash
+```
 help --quick                   # Quick command reference
 help --cheatsheet              # Print cheatsheet
 help --examples mmand>      # Just show examples
 ```
 
 #### 4. Interactive Inspector Mode
-```bash
+```
 help --inspector               # Full interactive mode
 ```
 
@@ -500,7 +500,7 @@ help --inspector               # Full interactive mode
 - Print help
 
 **Help Options:**
-```bash
+```
 help --verbose                 # Maximum detail
 help --brief                   # Minimal info
 help --usage                   # Just usage syntax
@@ -513,7 +513,7 @@ help --dev                     # Developer information
 Full documentation viewer and editor.
 
 **Usage:**
-```bash
+```
 docs                           # Documentation index
 docs <section>                 # View specific section
 docs search <term>             # Search documentation
@@ -523,7 +523,7 @@ docs export <format>           # Export documentation
 ```
 
 **Available Documentation:**
-```bash
+```
 docs list                      # List all docs
 
 Available Documentation:
