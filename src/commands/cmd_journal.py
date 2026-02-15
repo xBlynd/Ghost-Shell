@@ -1,37 +1,28 @@
-import sys
-from src.core.vault_api import VaultAPI
-from src.core.host_bridge import HostBridge
+from datetime import datetime
+from typing import List
 
-def run(args):
-    api = VaultAPI()
-    if not args:
-        print("Usage: xsv journal <add|view|open> [args]")
-        return
+from core.kernel import GhostKernel
 
-    cmd = args[0].lower()
 
-    if cmd == "add":
-        if len(args) < 2:
-            print("Usage: xsv journal add 'Title' 'Content'")
-            return
-        # If user provides 1 arg, treat as content with generic title
-        if len(args) == 2:
-            title = "Note"
-            content = args[1]
-        else:
-            title = args[1]
-            content = " ".join(args[2:])
-            
-        success, res = api.append_journal(title, content)
-        if success: print(f"✅ Saved to {res.name}")
+MANIFEST = {
+    "name": "journal",
+    "desc": "Append to your daily journal in data/vault/journal.",
+    "version": "0.1.0-phoenix",
+    "usage": "journal [text...]",
+    "author": "Ghost Core",
+}
 
-    elif cmd == "view":
-        print(api.read_journal())
 
-    elif cmd == "open":
-        path = api.get_journal_path()
-        if not path.exists(): api.append_journal("Init", "Log started.")
-        print(f"🚀 Opening {path.name}...")
-        HostBridge.launch(str(path))
-    else:
-        print("Unknown command.")
+def run(args: List[str], ghost: GhostKernel) -> None:
+    interface = ghost.get_engine("interface")
+    vault = ghost.get_engine("vault")
+
+    assert interface is not None
+    assert vault is not None
+
+    body = " ".join(args) if args else ""
+    today = datetime.now().strftime("%Y-%m-%d")
+    ts = datetime.now().strftime("%H:%M:%S")
+    entry = f"\n\n## {ts}\n\n{body}\n"
+    path = vault.append_text("journal", today, entry)
+    interface.print_info(f"Journal updated: {path}")
