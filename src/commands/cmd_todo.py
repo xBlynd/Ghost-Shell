@@ -3,9 +3,18 @@ Command: todo
 Task management with priorities.
 """
 
-DESCRIPTION = "Manage todo items"
-USAGE = "todo add <text> | todo list | todo done <id> | todo rm <id>"
-REQUIRED_ROLE = "GUEST"
+MANIFEST = {
+    "name": "todo",
+    "description": "Manage todo items",
+    "version": "1.0.0",
+    "usage": "todo add <text> | todo list | todo done <id> | todo rm <id>",
+    "author": "xsvStudio",
+    "required_role": "GUEST",
+    "engine_deps": ["vault", "interface"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

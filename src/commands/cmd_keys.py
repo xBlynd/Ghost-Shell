@@ -9,9 +9,18 @@ Key Types:
   GUEST: Read-only. Can be time-limited (great for lending USB).
 """
 
-DESCRIPTION = "Manage authentication keys"
-USAGE = "keys list | keys issue <role> [label] | keys revoke <id> | keys info <id>"
-REQUIRED_ROLE = "ADMIN"
+MANIFEST = {
+    "name": "keys",
+    "description": "Manage authentication keys",
+    "version": "1.0.0",
+    "usage": "keys list | keys issue <role> [label] | keys revoke <id> | keys info <id>",
+    "author": "xsvStudio",
+    "required_role": "ADMIN",
+    "engine_deps": ["security", "interface"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

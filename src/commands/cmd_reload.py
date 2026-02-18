@@ -4,9 +4,18 @@ Hot reload commands without restarting Ghost Shell.
 Edit a cmd_*.py file and run `reload <name>` to pick up changes instantly.
 """
 
-DESCRIPTION = "Hot reload commands"
-USAGE = "reload <command> | reload all"
-REQUIRED_ROLE = "ADMIN"
+MANIFEST = {
+    "name": "reload",
+    "description": "Hot reload commands",
+    "version": "1.0.0",
+    "usage": "reload <command> | reload all",
+    "author": "xsvStudio",
+    "required_role": "ADMIN",
+    "engine_deps": ["loader"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

@@ -3,9 +3,18 @@ Command: clear
 Clear the terminal screen.
 """
 
-DESCRIPTION = "Clear the screen"
-USAGE = "clear"
-REQUIRED_ROLE = "GUEST"
+MANIFEST = {
+    "name": "clear",
+    "description": "Clear the screen",
+    "version": "1.0.0",
+    "usage": "clear",
+    "author": "xsvStudio",
+    "required_role": "GUEST",
+    "engine_deps": [],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 import os

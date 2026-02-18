@@ -3,9 +3,18 @@ Command: journal
 Personal journal management. Add entries, list, search.
 """
 
-DESCRIPTION = "Manage journal entries"
-USAGE = "journal add <text> | journal list [date] | journal search <query>"
-REQUIRED_ROLE = "GUEST"
+MANIFEST = {
+    "name": "journal",
+    "description": "Manage journal entries",
+    "version": "1.0.0",
+    "usage": "journal add <text> | journal list [date] | journal search <query>",
+    "author": "xsvStudio",
+    "required_role": "GUEST",
+    "engine_deps": ["vault"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

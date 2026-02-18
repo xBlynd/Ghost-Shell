@@ -1,6 +1,6 @@
 {
-  "session_id": "20260215_072711",
-  "boot_time": 1771158431.7122974,
+  "session_id": "20260218_010549",
+  "boot_time": 1771394749.16414,
   "version": "6.5.0-phoenix",
   "engines_loaded": [
     "ghost_core",
@@ -20,16 +20,23 @@
   "engines_failed": [],
   "commands_loaded": [
     "ask",
+    "cleanup",
     "clear",
+    "config",
+    "dashboard",
     "eve",
     "help",
+    "host",
     "journal",
     "keys",
     "legion",
     "net",
+    "netinfo",
     "ping",
     "reload",
+    "remind",
     "status",
+    "sync",
     "sysinfo",
     "todo"
   ],

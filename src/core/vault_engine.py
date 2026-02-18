@@ -3,6 +3,7 @@ Engine 07: Vault Engine - The Archive
 ========================================
 Data persistence: journals, todos, encrypted storage, exports.
 All data lives in data/vault/ using simple files (no database dependency).
+Vault path is configurable via data/config/settings.json.
 
 Compartmentalization:
 - ONLY handles file operations
@@ -19,19 +20,60 @@ class VaultEngine:
     """The Archive - data persistence and management."""
 
     ENGINE_NAME = "vault"
-    ENGINE_VERSION = "1.0.0"
+    ENGINE_VERSION = "2.0.0"
 
     def __init__(self, kernel):
         self.kernel = kernel
         self.root_dir = kernel.root_dir
-        self.vault_dir = os.path.join(self.root_dir, "data", "vault")
+
+        # Resolve vault path from settings (or fall back to local)
+        self.vault_dir = self.resolve_vault_path()
+
         self.journal_dir = os.path.join(self.vault_dir, "journal")
         self.todos_dir = os.path.join(self.vault_dir, "todos")
         self.encrypted_dir = os.path.join(self.vault_dir, "encrypted")
 
+        # Keys path NEVER follows vault_path — always machine-local
+        self.keys_dir = os.path.join(self.root_dir, "data", "keys")
+
         # Ensure directories exist
-        for d in [self.journal_dir, self.todos_dir, self.encrypted_dir]:
+        for d in [self.journal_dir, self.todos_dir, self.encrypted_dir, self.keys_dir]:
             os.makedirs(d, exist_ok=True)
+
+    # =========================================================================
+    # VAULT PATH RESOLUTION
+    # =========================================================================
+
+    def resolve_vault_path(self):
+        """
+        Determine vault directory from settings.json.
+        Priority: settings.json vault_path → local data/vault/
+        Keys NEVER follow vault_path.
+        """
+        local_vault = os.path.join(self.root_dir, "data", "vault")
+        settings_path = os.path.join(self.root_dir, "data", "config", "settings.json")
+
+        if not os.path.exists(settings_path):
+            return local_vault
+
+        try:
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+
+            custom_path = settings.get("vault_path")
+            if not custom_path:
+                return local_vault
+
+            # Validate the custom path
+            if os.path.isdir(custom_path):
+                return custom_path
+            else:
+                # Path configured but doesn't exist — warn and fall back
+                print(f"   [!] Vault: configured path '{custom_path}' missing, using local")
+                return local_vault
+
+        except Exception:
+            return local_vault
 
     # =========================================================================
     # JOURNAL
@@ -77,10 +119,13 @@ class VaultEngine:
             return {"date": date, "content": None, "error": "No entries for this date"}
 
         # List recent journal files
-        files = sorted(
-            [f for f in os.listdir(self.journal_dir) if f.endswith('.md')],
-            reverse=True
-        )[:last_n]
+        try:
+            files = sorted(
+                [f for f in os.listdir(self.journal_dir) if f.endswith('.md')],
+                reverse=True
+            )[:last_n]
+        except FileNotFoundError:
+            files = []
 
         entries = []
         for f in files:
@@ -93,12 +138,16 @@ class VaultEngine:
                 "size_bytes": size,
             })
 
-        return {"entries": entries, "total_files": len(os.listdir(self.journal_dir))}
+        total = len(os.listdir(self.journal_dir)) if os.path.exists(self.journal_dir) else 0
+        return {"entries": entries, "total_files": total}
 
     def journal_search(self, query):
         """Search across all journal entries."""
         results = []
         query_lower = query.lower()
+
+        if not os.path.exists(self.journal_dir):
+            return {"query": query, "results": [], "total_matches": 0}
 
         for f in sorted(os.listdir(self.journal_dir), reverse=True):
             if not f.endswith('.md'):
@@ -119,7 +168,7 @@ class VaultEngine:
         """Extract lines containing the search query."""
         lines = content.split('\n')
         matches = [l.strip() for l in lines if query in l.lower()]
-        return matches[:3]  # Max 3 preview lines
+        return matches[:3]
 
     # =========================================================================
     # TODOS
@@ -133,7 +182,7 @@ class VaultEngine:
         item = {
             "id": todo_id,
             "text": text,
-            "priority": priority,  # low, normal, high, critical
+            "priority": priority,
             "created": datetime.now().isoformat(),
             "completed": None,
             "done": False,
@@ -190,6 +239,7 @@ class VaultEngine:
 
     def _save_todos(self, todos):
         """Save todos to file."""
+        os.makedirs(self.todos_dir, exist_ok=True)
         todo_file = os.path.join(self.todos_dir, "active.json")
         with open(todo_file, 'w', encoding='utf-8') as f:
             json.dump(todos, f, indent=2)
@@ -204,9 +254,13 @@ class VaultEngine:
 
     def get_stats(self):
         """Return vault statistics."""
-        journal_count = len([
-            f for f in os.listdir(self.journal_dir) if f.endswith('.md')
-        ])
+        try:
+            journal_count = len([
+                f for f in os.listdir(self.journal_dir) if f.endswith('.md')
+            ])
+        except FileNotFoundError:
+            journal_count = 0
+
         todos = self._load_todos()
         active_todos = len([i for i in todos["items"] if not i["done"]])
         done_todos = len([i for i in todos["items"] if i["done"]])

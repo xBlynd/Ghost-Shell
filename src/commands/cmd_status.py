@@ -1,18 +1,27 @@
 """
 Command: status
-System health dashboard showing engine status, memory, uptime.
+System health dashboard — engines, commands by tier, boot diagnostics, vault stats.
 """
 
-DESCRIPTION = "Show system health status"
-USAGE = "status"
-REQUIRED_ROLE = "GUEST"
+MANIFEST = {
+    "name": "status",
+    "description": "Show system health status",
+    "version": "2.0.0",
+    "usage": "status",
+    "author": "xsvStudio",
+    "required_role": "GUEST",
+    "engine_deps": ["ghost_core", "security", "heartbeat", "vault", "legion", "eve"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):
     """Display system status."""
     lines = []
 
-    # System info
+    # ── System / Node ──────────────────────────────────────────────────────────
     core = kernel.get_engine("ghost_core")
     if core:
         state = core.get_state()
@@ -27,13 +36,13 @@ def execute(kernel, args):
         lines.append("\n  ┌─ GHOST SHELL PHOENIX ─────────────────────┐")
         lines.append(f"  │ Version: {kernel.VERSION}")
 
-    # Security
+    # ── Security ───────────────────────────────────────────────────────────────
     sec = kernel.get_engine("security")
     if sec:
         lines.append(f"  │ Role:     {sec.current_role}")
         lines.append(f"  │ Auth:     {'Yes' if sec.authenticated else 'No'}")
 
-    # Health
+    # ── Health ─────────────────────────────────────────────────────────────────
     heartbeat = kernel.get_engine("heartbeat")
     if heartbeat:
         health = heartbeat.check_health()
@@ -44,36 +53,84 @@ def execute(kernel, args):
         if mem.get("rss_mb") != "unknown":
             lines.append(f"  │ Memory:   {mem.get('rss_mb', '?')} MB")
 
-    # Engines
+    # ── Engines ────────────────────────────────────────────────────────────────
     lines.append("  │")
     lines.append("  │ Engines:")
     for name, engine in kernel.engines.items():
         if engine is not None:
             ver = getattr(engine, 'ENGINE_VERSION', '?')
-            op = getattr(engine, 'OPERATIONAL', True)
-            status = "✓" if op else "○ stub"
-            lines.append(f"  │   {status} {name:<14} v{ver}")
+            lines.append(f"  │   ✓ {name:<14} v{ver}")
         else:
             lines.append(f"  │   ✗ {name:<14} FAILED")
 
-    # Commands
-    lines.append(f"  │")
-    lines.append(f"  │ Commands: {len(kernel.commands)} loaded")
+    # ── Commands by Tier ───────────────────────────────────────────────────────
+    lines.append("  │")
+    loader = kernel.get_engine("loader")
+    if loader:
+        tiers = loader.get_commands_by_tier()
+        system_cmds = tiers.get("system", {})
+        custom_cmds = tiers.get("custom", {})
+        lib_scripts = loader.list_library_scripts()
+        unregistered = loader.unregistered
 
-    # Vault stats
+        lines.append(f"  │ Commands: {len(kernel.commands)} loaded")
+
+        # System commands
+        if system_cmds:
+            lines.append(f"  │   System ({len(system_cmds)}):")
+            for name in sorted(system_cmds):
+                flag = " [!]" if name in unregistered else ""
+                lines.append(f"  │     {name}{flag}")
+
+        # Custom commands
+        if custom_cmds:
+            lines.append(f"  │   Custom ({len(custom_cmds)}):")
+            for name in sorted(custom_cmds):
+                flag = " [!]" if name in unregistered else ""
+                lines.append(f"  │     {name}{flag}")
+
+        # Library scripts
+        if lib_scripts:
+            lines.append(f"  │   Library ({len(lib_scripts)}):")
+            for name, info in lib_scripts.items():
+                lines.append(f"  │     {name} ({info['extension']})")
+        else:
+            lines.append(f"  │   Library: (empty)")
+
+        if unregistered:
+            lines.append(f"  │   [!] {len(unregistered)} command(s) missing MANIFEST")
+    else:
+        lines.append(f"  │ Commands: {len(kernel.commands)} loaded")
+
+    # ── Boot Diagnostics ───────────────────────────────────────────────────────
+    if heartbeat:
+        diag = heartbeat.get_last_diagnostics()
+        if diag:
+            lines.append("  │")
+            if diag["clean"]:
+                lines.append("  │ Boot Diagnostics: ✓ Clean")
+            else:
+                lines.append("  │ Boot Diagnostics: ⚠ Issues found")
+                for err in diag.get("syntax_errors", []):
+                    lines.append(f"  │   [syntax] {err['file']}")
+                for d in diag.get("missing_dirs", []):
+                    lines.append(f"  │   [missing] {d}/")
+
+    # ── Vault ──────────────────────────────────────────────────────────────────
     vault = kernel.get_engine("vault")
     if vault:
         stats = vault.get_stats()
+        lines.append(f"  │")
         lines.append(f"  │ Journal:  {stats['journal_entries']} entries")
         lines.append(f"  │ Todos:    {stats['active_todos']} active, {stats['completed_todos']} done")
 
-    # Legion
+    # ── Legion ─────────────────────────────────────────────────────────────────
     legion = kernel.get_engine("legion")
     if legion:
         lstatus = legion.get_status()
         lines.append(f"  │ Legion:   {'Online' if lstatus['operational'] else 'Standby'} ({lstatus['known_nodes']} nodes)")
 
-    # Eve AI
+    # ── Eve AI ─────────────────────────────────────────────────────────────────
     eve = kernel.get_engine("eve")
     if eve:
         estatus = eve.get_status()

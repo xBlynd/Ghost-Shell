@@ -4,9 +4,18 @@ Quick alias - routes to Eve AI engine.
 Shorthand for `eve ask <question>`.
 """
 
-DESCRIPTION = "Ask the AI (Eve)"
-USAGE = "ask <your question>"
-REQUIRED_ROLE = "GUEST"
+MANIFEST = {
+    "name": "ask",
+    "description": "Ask the AI (Eve)",
+    "version": "1.0.0",
+    "usage": "ask <your question>",
+    "author": "xsvStudio",
+    "required_role": "GUEST",
+    "engine_deps": ["eve"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

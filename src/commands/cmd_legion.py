@@ -4,9 +4,18 @@ Manage the Legion distributed mesh network.
 Currently a stub - architecture ready for implementation.
 """
 
-DESCRIPTION = "Legion mesh network management"
-USAGE = "legion status | legion nodes | legion register <address>"
-REQUIRED_ROLE = "ADMIN"
+MANIFEST = {
+    "name": "legion",
+    "description": "Legion mesh network management",
+    "version": "1.0.0",
+    "usage": "legion status | legion nodes | legion register <address>",
+    "author": "xsvStudio",
+    "required_role": "ADMIN",
+    "engine_deps": ["legion", "interface"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

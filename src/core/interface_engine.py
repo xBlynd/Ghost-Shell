@@ -15,12 +15,19 @@ Compartmentalization:
 - NEVER performs business logic
 """
 
+# Detect Textual availability at module level (graceful degradation)
+try:
+    import textual  # noqa: F401
+    HAS_TEXTUAL = True
+except ImportError:
+    HAS_TEXTUAL = False
+
 
 class InterfaceEngine:
     """The Face - visual presentation and theming."""
 
     ENGINE_NAME = "interface"
-    ENGINE_VERSION = "1.0.0"
+    ENGINE_VERSION = "2.0.0"
 
     # === ASCII BANNERS ===
     BANNER_GOD = r"""
@@ -35,28 +42,28 @@ class InterfaceEngine:
     ║                                                      ║
     ║           S H E L L   P H O E N I X                  ║
     ║              ⚡ G O D   M O D E ⚡                    ║
-    ║                  v6.0 Phoenix                        ║
+    ║                  v6.5 Phoenix                        ║
     ╚══════════════════════════════════════════════════════╝
     """
 
     BANNER_GUEST = r"""
     ╔══════════════════════════════════════════════════════╗
-    ║          👻 GHOST SHELL PHOENIX v6.0                 ║
+    ║          👻 GHOST SHELL PHOENIX v6.5                 ║
     ║              Guest Mode (Read-Only)                  ║
     ╚══════════════════════════════════════════════════════╝
     """
 
     BANNER_ADMIN = r"""
     ╔══════════════════════════════════════════════════════╗
-    ║          👻 GHOST SHELL PHOENIX v6.0                 ║
+    ║          👻 GHOST SHELL PHOENIX v6.5                 ║
     ║              ◆ Admin Mode                            ║
     ╚══════════════════════════════════════════════════════╝
     """
 
     def __init__(self, kernel):
         self.kernel = kernel
-        # Future: load theme from config
         self.theme = "default"
+        self.has_textual = HAS_TEXTUAL
 
     def get_banner(self, role=None):
         """Get the appropriate banner for current role."""
@@ -70,35 +77,29 @@ class InterfaceEngine:
     # =========================================================================
     # OUTPUT FORMATTING
     # =========================================================================
-    # These methods return formatted strings. The shell loop prints them.
-    # Future GUI/Web renders would consume the same data but render differently.
 
     def format_table(self, headers, rows, title=None):
         """Format data as a text table."""
         if not rows:
             return "  (no data)"
 
-        # Calculate column widths
         col_widths = [len(str(h)) for h in headers]
         for row in rows:
             for i, cell in enumerate(row):
                 if i < len(col_widths):
                     col_widths[i] = max(col_widths[i], len(str(cell)))
 
-        # Build table
         lines = []
         if title:
             lines.append(f"\n  {title}")
             lines.append("  " + "─" * (sum(col_widths) + len(col_widths) * 3))
 
-        # Header
         header_line = "  "
         for i, h in enumerate(headers):
             header_line += f" {str(h):<{col_widths[i]}} │"
         lines.append(header_line)
         lines.append("  " + "─" * (sum(col_widths) + len(col_widths) * 3))
 
-        # Rows
         for row in rows:
             row_line = "  "
             for i, cell in enumerate(row):
@@ -133,7 +134,7 @@ class InterfaceEngine:
     def format_todo_list(self, items):
         """Format todo list for display."""
         if not items:
-            return "  No active todos. 🎉"
+            return "  No active todos."
 
         lines = ["\n  ┌─ TODO ─┐"]
         for item in items:
@@ -148,21 +149,107 @@ class InterfaceEngine:
         return "\n".join(lines)
 
     def format_help(self, commands):
-        """Format the help menu."""
+        """Format the help menu showing all tiers."""
+        loader = self.kernel.get_engine("loader")
+
+        if loader:
+            return self.format_command_list(
+                system=loader.get_commands_by_tier().get("system", {}),
+                custom=loader.get_commands_by_tier().get("custom", {}),
+                library=loader.list_library_scripts(),
+            )
+
+        # Fallback: flat list
         lines = [
             "\n  ┌─ GHOST SHELL COMMANDS ─┐",
             "  │",
         ]
-
-        # Group by category if available
         for name, module in sorted(commands.items()):
             desc = getattr(module, 'DESCRIPTION', 'No description')
             role = getattr(module, 'REQUIRED_ROLE', 'GUEST')
             lines.append(f"  │  {name:<14} {desc:<40} [{role}]")
-
         lines.extend([
             "  │",
             "  │  Any other input passes through to host OS",
             "  └──────────────────────┘",
         ])
         return "\n".join(lines)
+
+    def format_command_list(self, system, custom, library):
+        """
+        Format help output showing commands grouped by tier.
+
+        Args:
+            system: dict of {name: info} for system commands
+            custom: dict of {name: info} for custom commands
+            library: dict of {name: info} for library scripts
+        """
+        lines = ["\n  ┌─ GHOST SHELL COMMANDS ─────────────────────────────────────┐"]
+
+        # System commands
+        if system:
+            lines.append("  │  ── System Commands ──")
+            for name, info in sorted(system.items()):
+                desc = info.get("description", "")[:38]
+                role = info.get("required_role", "GUEST")
+                lines.append(f"  │    {name:<14} {desc:<38} [{role}]")
+
+        # Custom commands
+        if custom:
+            lines.append("  │")
+            lines.append("  │  ── Custom Commands ──")
+            for name, info in sorted(custom.items()):
+                desc = info.get("description", "")[:38]
+                role = info.get("required_role", "GUEST")
+                lines.append(f"  │    {name:<14} {desc:<38} [{role}]")
+
+        # Library scripts
+        if library:
+            lines.append("  │")
+            lines.append("  │  ── Library Scripts ──")
+            for name, info in sorted(library.items()):
+                ext = info.get("extension", "")
+                interp = info.get("interpreter", "")
+                lines.append(f"  │    {name:<14} ({ext} — {interp})")
+
+        lines.extend([
+            "  │",
+            "  │  Any other input passes through to host OS",
+            "  └────────────────────────────────────────────────────────────┘",
+        ])
+        return "\n".join(lines)
+
+    def format_result(self, data, style="default"):
+        """
+        Generic formatter for engine data (dict or list).
+        Returns a formatted string suitable for terminal output.
+        """
+        if data is None:
+            return "  (no data)"
+
+        if isinstance(data, str):
+            return data
+
+        if isinstance(data, list):
+            if not data:
+                return "  (empty)"
+            if all(isinstance(item, dict) for item in data):
+                # List of dicts: render as table
+                if data:
+                    headers = list(data[0].keys())
+                    rows = [[str(item.get(h, "")) for h in headers] for item in data]
+                    return self.format_table(headers, rows)
+            return "\n".join(f"  • {item}" for item in data)
+
+        if isinstance(data, dict):
+            if style == "table":
+                headers = ["Key", "Value"]
+                rows = [[str(k), str(v)] for k, v in data.items()]
+                return self.format_table(headers, rows)
+            # Default: key: value pairs
+            lines = []
+            for k, v in data.items():
+                lines.append(f"  {k}: {v}")
+            return "\n".join(lines)
+
+        return str(data)

@@ -3,9 +3,18 @@ Command: ping
 Enhanced ping with jitter/variance analysis via BlackBoxEngine.
 """
 
-DESCRIPTION = "Ping with jitter analysis"
-USAGE = "ping <host> [count]"
-REQUIRED_ROLE = "GUEST"
+MANIFEST = {
+    "name": "ping",
+    "description": "Ping with jitter analysis",
+    "version": "1.0.0",
+    "usage": "ping <host> [count]",
+    "author": "xsvStudio",
+    "required_role": "GUEST",
+    "engine_deps": ["blackbox", "interface", "vault"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

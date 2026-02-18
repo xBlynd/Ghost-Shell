@@ -12,6 +12,14 @@ Usage:
 import sys
 import os
 
+# === UTF-8 FIX ===
+# Windows consoles default to cp1252. Force UTF-8 so emoji and box-drawing
+# characters in banners and output render correctly on all platforms.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 # === THE ANCHOR ===
 # This single line makes the ENTIRE system portable.
 # No matter where Ghost Shell lives (USB, C:\Dev, /home/user, Android storage),

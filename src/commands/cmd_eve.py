@@ -4,9 +4,18 @@ Interact with the Eve AI engine.
 Ask questions, check status, configure tiers and mothership connection.
 """
 
-DESCRIPTION = "Talk to Eve AI"
-USAGE = "eve ask <question> | eve status | eve setup | eve tier <name> | eve mothership <url>"
-REQUIRED_ROLE = "GUEST"
+MANIFEST = {
+    "name": "eve",
+    "description": "Talk to Eve AI",
+    "version": "1.0.0",
+    "usage": "eve ask <question> | eve status | eve setup | eve tier <name> | eve mothership <url>",
+    "author": "xsvStudio",
+    "required_role": "GUEST",
+    "engine_deps": ["eve"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

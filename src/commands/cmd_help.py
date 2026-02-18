@@ -3,9 +3,18 @@ Command: help
 Shows all available Ghost Shell commands.
 """
 
-DESCRIPTION = "Show available commands"
-USAGE = "help [command]"
-REQUIRED_ROLE = "GUEST"
+MANIFEST = {
+    "name": "help",
+    "description": "Show available commands",
+    "version": "1.0.0",
+    "usage": "help [command]",
+    "author": "xsvStudio",
+    "required_role": "GUEST",
+    "engine_deps": ["loader", "interface"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

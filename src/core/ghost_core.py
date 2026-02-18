@@ -42,6 +42,9 @@ class GhostCoreEngine:
         self.python_version = None
         self.boot_timestamp = datetime.now().isoformat()
 
+        # Current working directory for host navigator
+        self._cwd = str(os.getcwd())
+
         # === Detect environment ===
         self._detect_os()
         self._detect_portability()
@@ -156,6 +159,27 @@ class GhostCoreEngine:
             "boot_time": self.boot_timestamp,
             "version": self.ENGINE_VERSION,
         }
+
+    def get_cwd(self):
+        """Return the current working directory for the host navigator."""
+        return self._cwd
+
+    def set_cwd(self, path):
+        """
+        Set the current working directory. Validates the path exists.
+        Returns (success: bool, message: str).
+        """
+        import pathlib
+        try:
+            resolved = pathlib.Path(path).resolve()
+            if not resolved.exists():
+                return False, f"Path does not exist: {path}"
+            if not resolved.is_dir():
+                return False, f"Not a directory: {path}"
+            self._cwd = str(resolved)
+            return True, str(resolved)
+        except Exception as e:
+            return False, str(e)
 
     def set_node_type(self, node_type):
         """Update node type (MASTER, LEGIONNAIRE, HIVE_MIND)."""

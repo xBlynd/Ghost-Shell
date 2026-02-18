@@ -3,9 +3,18 @@ Command: net
 Network tools - check connectivity, interfaces, DNS.
 """
 
-DESCRIPTION = "Network tools (check, interfaces, dns)"
-USAGE = "net check | net interfaces | net dns <host>"
-REQUIRED_ROLE = "GUEST"
+MANIFEST = {
+    "name": "net",
+    "description": "Network tools (check, interfaces, dns)",
+    "version": "1.0.0",
+    "usage": "net check | net interfaces | net dns <host>",
+    "author": "xsvStudio",
+    "required_role": "GUEST",
+    "engine_deps": ["blackbox"],
+}
+DESCRIPTION = MANIFEST["description"]
+USAGE = MANIFEST["usage"]
+REQUIRED_ROLE = MANIFEST["required_role"]
 
 
 def execute(kernel, args):

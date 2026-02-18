@@ -116,10 +116,28 @@ class GhostKernel:
             print("   [FATAL] Critical engines failed to load. Cannot continue.")
             return False
 
-        # Phase 2: Discover commands
+        # Phase 2: Discover commands and library scripts
         if "loader" in self.engines and self.engines["loader"]:
-            self.commands = self.engines["loader"].discover_commands()
-            print(f"   Commands: {len(self.commands)} discovered")
+            loader = self.engines["loader"]
+            self.commands = loader.discover_commands()
+            loader.discover_library_scripts()
+            lib_count = len(loader.library_scripts)
+            print(f"   Commands: {len(self.commands)} discovered ({lib_count} library scripts)")
+
+        # Phase 2b: Boot diagnostics
+        if "heartbeat" in self.engines and self.engines["heartbeat"]:
+            diag = self.engines["heartbeat"].run_boot_diagnostics()
+            if not diag["clean"]:
+                if diag["syntax_errors"]:
+                    print(f"   [!] Syntax errors in {len(diag['syntax_errors'])} file(s):")
+                    for err in diag["syntax_errors"]:
+                        print(f"       {err['file']}")
+                if diag["missing_dirs"]:
+                    print(f"   [!] Missing dirs: {', '.join(diag['missing_dirs'])}")
+                    # Auto-repair non-sensitive dirs
+                    created = self.engines["heartbeat"].repair_missing_dirs(diag["missing_dirs"])
+                    if created:
+                        print(f"   [✓] Auto-created: {', '.join(created)}")
 
         # Phase 3: Start background services
         if "pulse" in self.engines and self.engines["pulse"]:
@@ -223,14 +241,20 @@ class GhostKernel:
         if cmd_name in self.commands:
             return self._execute_ghost_command(cmd_name, args_str)
 
-        # 2. Check Aliases
+        # 2. Check Library Scripts
+        if self.engine_available("loader"):
+            lib = self.engines["loader"].library_scripts
+            if cmd_name in lib:
+                return self._execute_library_script(cmd_name, args_str)
+
+        # 3. Check Aliases
         if cmd_name in self.aliases:
             alias_cmd = self.aliases[cmd_name]
             if "{target}" in alias_cmd and args_str:
                 alias_cmd = alias_cmd.replace("{target}", args_str)
             return self._execute_passthrough(alias_cmd)
 
-        # 3. Host OS Passthrough
+        # 4. Host OS Passthrough
         return self._execute_passthrough(raw_input)
 
     def _execute_ghost_command(self, cmd_name, args_str):
@@ -255,6 +279,51 @@ class GhostKernel:
             if self.debug:
                 import traceback
                 traceback.print_exc()
+
+    def _execute_library_script(self, name, args_str):
+        """Execute a library script with the appropriate interpreter."""
+        import platform
+        loader = self.engines.get("loader")
+        if not loader:
+            return
+        info = loader.get_library_info(name)
+        if not info:
+            return
+
+        path = info["path"]
+        interp = info["interpreter"]
+        os_type = platform.system().upper()
+
+        if interp == "native":
+            cmd = f'"{path}"'
+            if args_str:
+                cmd += f" {args_str}"
+        elif interp == "python":
+            cmd = f'python "{path}"'
+            if args_str:
+                cmd += f" {args_str}"
+        elif interp == "powershell":
+            cmd = f'powershell -ExecutionPolicy Bypass -File "{path}"'
+            if args_str:
+                cmd += f" {args_str}"
+        elif interp == "bash":
+            cmd = f'bash "{path}"'
+            if args_str:
+                cmd += f" {args_str}"
+        elif interp == "batch":
+            cmd = f'cmd /c "{path}"'
+            if args_str:
+                cmd += f" {args_str}"
+        elif interp == "node":
+            cmd = f'node "{path}"'
+            if args_str:
+                cmd += f" {args_str}"
+        else:
+            cmd = f'"{path}"'
+            if args_str:
+                cmd += f" {args_str}"
+
+        self._execute_passthrough(cmd)
 
     def _execute_passthrough(self, cmd):
         """Pass command to host OS shell."""
