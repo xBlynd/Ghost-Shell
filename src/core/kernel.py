@@ -252,7 +252,9 @@ class GhostKernel:
             alias_cmd = self.aliases[cmd_name]
             if "{target}" in alias_cmd and args_str:
                 alias_cmd = alias_cmd.replace("{target}", args_str)
-            return self._execute_passthrough(alias_cmd)
+            elif args_str:
+                alias_cmd = f"{alias_cmd} {args_str}"
+            return self.resolve_and_execute(alias_cmd)
 
         # 4. Host OS Passthrough
         return self._execute_passthrough(raw_input)

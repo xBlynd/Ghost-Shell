@@ -3,5 +3,6 @@
     "ports": "netstat -tlnp",
     "ip": "ipconfig" ,
     "ll": "ls -la",
-    "cls": "clear"
+    "cls": "clear",
+    "minecraft": "mc"
 }

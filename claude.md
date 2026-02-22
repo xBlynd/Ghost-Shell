@@ -189,6 +189,13 @@ ghost-shell-phoenix/
 - **QoL Build (in progress):** LoaderEngine (full auto-discovery + MANIFEST), HeartbeatEngine (boot diagnostics, py_compile, auto-repair), Root upgrade (raw data methods, safe command tweaking), Host Navigator (ls/cd/open/find), PulseEngine (reminders + toast), SyncEngine (export/import backups), InterfaceEngine (formatting + optional Textual TUI)
 - **Planned (NOT building yet):** Full Textual TUI overhaul, Legion Phase 2, Eve architect mode, Ghost Engine stealth suite, Wraith installer, Minecraft server manager
 
+## Ghost Drive
+
+The portable/stealth deployment architecture for Ghost Shell.
+Full vision: `docs/GHOST_DRIVE_VISION.md` (partially captured — Ian filling in gaps via the TODO section).
+Build status: Ghost Engine (stub — Phase A), Vault Encryption (plaintext — Phase B), Wraith Installer (planned — Phase C), Tools Toolkit (empty library/ — Phase D).
+Do NOT start Ghost Drive build phases without Ian filling in the TODO gaps in the vision doc first.
+
 ## Session Protocol (For Claude Code / CLI)
 
 1. **Read this file first.** Always. This is non-negotiable.
